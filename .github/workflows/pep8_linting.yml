@@ -1,0 +1,37 @@
+name: PEP 8 Linting
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+      - feature/pep8-linting-ci
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+
+      - name: Install flake8
+        run: pip install flake8
+
+      - name: Run flake8
+        run: flake8 . --count --ignore=E231 --show-source --statistics
+
+      - name: Notify Slack
+        if: failure() # 작업이 실패할 경우에만 실행
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }} # 앞서 생성한 Secret 사용
+          SLACK_CHANNEL: general # 알림을 보낼 채널 지정
+          SLACK_USERNAME: GitHub Actions # 알림을 보내는 사용자 이름
+          SLACK_COLOR: "#FF0000" # 알림 메시지의 색상
+
