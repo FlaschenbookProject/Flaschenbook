@@ -74,6 +74,7 @@ def main():
         headers = {}
         params = {}
         books = {'items': []}
+        source_dir = f'airflow/data/{site}/'
 
         for isbn in isbn_list:
             if site == 'naver' and len(isbn) == 10:
@@ -108,12 +109,12 @@ def main():
 
             books['items'].append(book_info)
 
-        file_path = f"airflow/data/{site}/raw+book_info+{site}+{TODAY}+books.json"
+        file_path = f"{source_dir}raw+book_info+{site}+{TODAY}+books_init.json"
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(books, f, ensure_ascii=False, indent=4)
 
         bucket_name = BUCKET_NAME
-        source_dir = f'airflow/data/{site}/'
+
         print(source_dir)
         upload_files_to_s3(bucket_name, source_dir)
 
