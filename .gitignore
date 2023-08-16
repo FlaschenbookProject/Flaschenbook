@@ -4,6 +4,8 @@
 
 # Log files
 *.log
+logs
+logs/*
 
 # Environment configurations
 .env
