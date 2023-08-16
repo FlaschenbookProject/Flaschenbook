@@ -74,6 +74,7 @@ def main():
         headers = {}
         params = {}
         books = {'items': []}
+        source_dir = f'airflow/data/{site}/'
 
         for isbn in isbn_list:
             if site == 'naver' and len(isbn) == 10:
@@ -81,15 +82,17 @@ def main():
 
             if site == 'naver':
                 url = f"https://openapi.naver.com/v1/search/book.json?query={isbn}&start=1"
+                naver_client_id = os.environ.get("NAVER_CLIENT_ID")
+                naver_client_secret = os.environ.get("NAVER_CLIENT_SECRET")
                 headers = {
-                    "X-Naver-Client-Id": os.environ.get("NAVER_CLIENT_ID"),
-                    "X-Naver-Client-Secret": os.environ.get("NAVER_CLIENT_SECRET")
+                    "X-Naver-Client-Id": naver_client_id,
+                    "X-Naver-Client-Secret": naver_client_secret
                 }
             elif site == 'kakao':
-                url = f"https://dapi.kakao.com/v3/search/book?target=isbn"
-
+                url = "https://dapi.kakao.com/v3/search/book?target=isbn"
+                kakao_rest_api_key = os.environ.get("KAKAO_REST_API_KEY")
                 headers = {
-                    "Authorization": f'KakaoAK {os.environ.get("KAKAO_REST_API_KEY")}'
+                    "Authorization": f'KakaoAK {kakao_rest_api_key}'
                 }
                 params = {
                     "query": isbn
@@ -106,12 +109,12 @@ def main():
 
             books['items'].append(book_info)
 
-        file_path = f"airflow/data/{site}/raw+book_info+{site}+{TODAY}+books.json"
+        file_path = f"{source_dir}raw+book_info+{site}+{TODAY}+books_init.json"
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(books, f, ensure_ascii=False, indent=4)
 
         bucket_name = BUCKET_NAME
-        source_dir = f'airflow/data/{site}/'
+
         print(source_dir)
         upload_files_to_s3(bucket_name, source_dir)
 
