@@ -3,13 +3,13 @@ from datetime import datetime
 from dotenv import load_dotenv
 import boto3
 
-load_dotenv() #env 파일 로드
+load_dotenv()  # env 파일 로드
 
 # AWS 계정 및 리전 설정
 aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
 aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
 bucket_name = os.getenv("BUCKET_NAME")
-s3_folder_path =  'raw/isbn/'
+s3_folder_path = 'raw/isbn/'
 # 현재 날짜를 yyyy-mm-dd 형식으로 포맷팅
 today = datetime.now().strftime("%Y-%m-%d")
 
@@ -34,6 +34,7 @@ if folder_prefix and not folder_prefix.endswith('/'):
 s3_client.put_object(Bucket=bucket_name, Key=folder_prefix)
 
 # 로컬 파일을 S3 버킷에 업로드
-s3_client.upload_file(local_csv_filename, bucket_name, s3_folder_path + os.path.basename(s3_filename))
+s3_client.upload_file(local_csv_filename, bucket_name,
+                      s3_folder_path + os.path.basename(s3_filename))
 
 print(f"{s3_folder_path}{os.path.basename(s3_filename)} 파일이 S3 버킷에 업로드되었습니다.")
