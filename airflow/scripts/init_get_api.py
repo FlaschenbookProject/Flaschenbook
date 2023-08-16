@@ -81,15 +81,17 @@ def main():
 
             if site == 'naver':
                 url = f"https://openapi.naver.com/v1/search/book.json?query={isbn}&start=1"
+                naver_client_id = os.environ.get("NAVER_CLIENT_ID")
+                naver_client_secret = os.environ.get("NAVER_CLIENT_SECRET")
                 headers = {
-                    "X-Naver-Client-Id": os.environ.get("NAVER_CLIENT_ID"),
-                    "X-Naver-Client-Secret": os.environ.get("NAVER_CLIENT_SECRET")
+                    "X-Naver-Client-Id": naver_client_id,
+                    "X-Naver-Client-Secret": naver_client_secret
                 }
             elif site == 'kakao':
-                url = f"https://dapi.kakao.com/v3/search/book?target=isbn"
-
+                url = "https://dapi.kakao.com/v3/search/book?target=isbn"
+                kakao_rest_api_key = os.environ.get("KAKAO_REST_API_KEY")
                 headers = {
-                    "Authorization": f'KakaoAK {os.environ.get("KAKAO_REST_API_KEY")}'
+                    "Authorization": f'KakaoAK {kakao_rest_api_key}'
                 }
                 params = {
                     "query": isbn
