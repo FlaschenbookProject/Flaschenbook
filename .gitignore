@@ -4,6 +4,8 @@
 
 # Log files
 *.log
+logs
+logs/*
 
 # Environment configurations
 .env
@@ -36,3 +38,6 @@ yarn-error.log*
 # IDE and editor files
 .idea/
 .vscode/
+
+# Cache
+__pycache__
