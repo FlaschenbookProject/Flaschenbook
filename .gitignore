@@ -38,3 +38,6 @@ yarn-error.log*
 # IDE and editor files
 .idea/
 .vscode/
+
+# Cache
+__pycache__
