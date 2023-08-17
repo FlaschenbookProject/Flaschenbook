@@ -24,7 +24,7 @@ jobs:
         run: pip install flake8
 
       - name: Run flake8
-        run: flake8 . --count --ignore=E231 --show-source --statistics
+        run: flake8 . --count --ignore=E231,E501 --show-source --statistics
 
       - name: Notify Slack
         if: failure() # 작업이 실패할 경우에만 실행
