@@ -53,12 +53,12 @@ def main(api_key):
 
     # limit 호출 횟수를 감안하여 첫 번째 페이지는 따로 탐색해 전체 페이지 확인 후 isbn 작업 처리
     json_data = get_json_data(1, api_key)
-    total_page = int(json_data["TOTAL_COUNT"])//500
+    total_page = int(json_data["TOTAL_COUNT"]) // 500
     isbn_list.extend(extract_isbn(json_data))
 
     # isbn_list 생성 (나머지 페이지에 대해서)
     # 1119까지 완료
-    for i in range(2, total_page//5+1):
+    for i in range(2, total_page // 5 + 1):
         data = get_json_data(i, api_key)
         isbn_list.extend(extract_isbn(data))
         print(f"success page number: {i}")
