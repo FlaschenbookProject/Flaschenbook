@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from airflow.providers.docker.operators.docker import DockerOperator
 from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
 from base.base_dag import BaseDAG
+from airflow.models import Variable
 import os
 
 
@@ -16,15 +17,16 @@ def create_fetch_new_book_dag(site):
     ) as dag:
 
         load_dotenv()
+        script_image = Variable.get("script_image")
+        bucket_name = Variable.get("bucket_name")
         environment = os.environ
         date = os.environ["TODAY"] = '{{ ds }}'
-        image = os.environ.get("SCRIPT_IMAGE")
-        object_key = f'raw/book_info/{site}/{date}/new.json'
         os.environ["BOOK_SITE"] = site
+        object_key = f'raw/book_info/{site}/{date}/new.json'
 
         fetch_api_data = DockerOperator(
             task_id='fetch_api_data',
-            image=image,
+            image=script_image,
             container_name='fetch_api_data',
             api_version='auto',
             auto_remove=True,
@@ -35,7 +37,7 @@ def create_fetch_new_book_dag(site):
 
         check_file_exists = S3KeySensor(
             task_id='check_file_exists',
-            bucket_key=f's3://{os.environ.get("BUCKET_NAME")}/{object_key}',
+            bucket_key=f's3://{bucket_name}/{object_key}',
             aws_conn_id='aws_conn_id',
             timeout=18 * 60 * 60,
             poke_interval=10 * 60,
