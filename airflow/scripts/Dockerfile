@@ -2,7 +2,7 @@
 FROM python:3.8-slim
 
 # 필요한 패키지 설치
-RUN pip install requests pandas python-dotenv boto3
+RUN pip install requests pandas python-dotenv boto3 urllib3
 
 # 작업 디렉터리 설정
 WORKDIR /app

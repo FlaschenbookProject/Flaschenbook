@@ -1,3 +1,4 @@
+from typing import List, Dict
 from utils.connections import get_s3_client
 import pandas as pd
 import os
@@ -8,7 +9,17 @@ import json
 import csv
 
 
-def get_isbn_list(bucket_name, object_key):
+def get_isbn_list(bucket_name: str, object_key: str) -> List[str]:
+    """
+    S3에서 ISBN 목록을 CSV로부터 가져오는 함수.
+
+    Args:
+        bucket_name (str): S3 버킷 이름
+        object_key (str): 가져올 파일의 S3 경로
+
+    Returns:
+        list: ISBN 목록
+    """
     s3_client = get_s3_client()
     response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
     csv_content = response['Body'].read().decode('utf-8')
@@ -17,7 +28,16 @@ def get_isbn_list(bucket_name, object_key):
     return df['ISBN'].tolist()
 
 
-def get_naver_api_key(number) -> dict:
+def get_naver_api_key(number: int) -> Dict[str, str]:
+    """
+    주어진 번호에 해당하는 NAVER API 키를 반환합니다.
+
+    Args:
+        number (int): 사용할 API 키 번호.
+
+    Returns:
+        dict: NAVER client ID와 client secret 정보
+    """
     keys = {
         i: {
             "naver_client_id": os.environ.get(f"NAVER_CLIENT_ID_{i}"),
@@ -28,7 +48,16 @@ def get_naver_api_key(number) -> dict:
     return keys[number]
 
 
-def get_kakao_api_key(number) -> dict:
+def get_kakao_api_key(number: int) -> Dict[str, str]:
+    """
+    주어진 번호에 해당하는 KAKAO API 키를 반환합니다.
+
+    Args:
+        number (int): 사용할 API 키 번호.
+
+    Returns:
+        dict: KAKAO REST API key 정보
+    """
     keys = {
         i: {
             "kakao_api_key": os.environ.get(f"KAKAO_REST_API_KEY_{i}")
@@ -38,7 +67,17 @@ def get_kakao_api_key(number) -> dict:
     return keys[number]
 
 
-def get_headers(site, key_num) -> dict:
+def get_headers(site: str, key_num: int) -> Dict[str, str]:
+    """
+    사이트 이름과 키 번호를 기반으로 API 호출 headers를 반환합니다.
+
+    Args:
+        site (str): API를 호출할 사이트 이름 ('naver' 또는 'kakao')
+        key_num (int): 사용할 API 키 번호
+
+    Returns:
+        dict: API 호출에 필요한 headers
+    """
     headers = {}
     if site == 'naver':
         key = get_naver_api_key(key_num)
@@ -57,7 +96,14 @@ def get_headers(site, key_num) -> dict:
     return headers
 
 
-def save_csv_file(file_path, isbn_list):
+def save_csv_file(file_path: str, isbn_list: List[str]) -> None:
+    """
+    ISBN 목록을 주어진 경로의 CSV 파일로 저장합니다.
+
+    Args:
+        file_path (str): ISBN 목록을 저장할 파일 경로
+        isbn_list (list): 저장할 ISBN 목록
+    """
     directory = os.path.dirname(file_path)
 
     if not os.path.exists(directory):
@@ -70,7 +116,14 @@ def save_csv_file(file_path, isbn_list):
             writer.writerow([isbn])
 
 
-def save_json_file(file_path, items):
+def save_json_file(file_path: str, items: Dict[str, Dict]) -> None:
+    """
+    주어진 항목을 JSON 파일로 저장합니다.
+
+    Args:
+        file_path (str): 항목을 저장할 파일 경로
+        items (list or dict): JSON 형식으로 저장할 항목
+    """
     directory = os.path.dirname(file_path)
 
     if not os.path.exists(directory):
@@ -80,7 +133,17 @@ def save_json_file(file_path, items):
         json.dump(items, f, ensure_ascii=False, indent=4)
 
 
-def fetch_api_data(isbn_list, site):
+def fetch_api_data(isbn_list: List[str], site: str) -> Dict[str, Dict]:
+    """
+    주어진 ISBN 목록과 사이트 정보를 사용하여 API에서 데이터를 가져옵니다.
+
+    Args:
+        isbn_list (list): 가져올 책의 ISBN 목록
+        site (str): 데이터를 가져올 사이트 이름
+
+    Returns:
+        dict: 수집된 책 정보
+    """
     url = ''
     headers = {}
     params = {}
