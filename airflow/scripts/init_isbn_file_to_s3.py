@@ -14,7 +14,7 @@ s3_folder_path = 'raw/isbn/'
 today = datetime.now().strftime("%Y-%m-%d")
 
 # S3에 업로드할 파일명
-s3_filename = f"{today}_init.csv"
+s3_filename = f"{today}_raw.csv"
 
 # 저장할 로컬 CSV 파일 경로
 local_csv_filename = f"airflow/data/{today}_init.csv"

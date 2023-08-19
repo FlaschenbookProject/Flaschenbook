@@ -9,17 +9,23 @@ from urllib3.util.retry import Retry
 
 # JSON 데이터를 가져오는 함수
 def get_json_data(page_no, api_key):
-    url = "http://www.aladin.co.kr/ttb/api/ItemList.aspx?ttbkey=" + api_key
-    option = "&QueryType=ItemNewAll&MaxResults=100&SearchTarget=Book&output=JS&Version=20131101&start=" + \
-        str(page_no)
-
+    url = "http://www.aladin.co.kr/ttb/api/ItemList.aspx"
+    params = {
+        "ttbkey": api_key,
+        "QueryType": "ItemNewAll",
+        "MaxResults": 100,
+        "SearchTarget": "Book",
+        "output": "JS",
+        "Version": 20131101,
+        "start": page_no
+    }          
     retry = Retry(total=3, backoff_factor=1)  # 최대 3번까지 재시도, 간격은 1초씩 증가
     adapter = HTTPAdapter(max_retries=retry)  # 재시도를 하기 위한 http 연결 관리
     http = requests.Session()
     http.mount("https://", adapter)
 
     try:
-        response = http.get(url + option)
+        response = http.get(url, params=params)
         response.raise_for_status()  # 요청이 실패했을 시 connection error 발생
         return response.json()
     # connection 오류 발생 시 예외 처리
@@ -48,7 +54,10 @@ def save_to_csv(isbn_list, filename):
     df.to_csv(filename, index=False)
 
 
-def main(api_key):
+def main():
+    load_dotenv()  # env 파일 로드
+
+    api_key = os.getenv("TTB_KEY")  
     new_isbn_list = []  # 오늘 날짜의 신간 isbn을 저장할 List
 
     # limit 호출 횟수를 감안하여 첫 번째 페이지는 따로 탐색해 전체 페이지 확인 후 isbn 작업 처리
@@ -58,24 +67,20 @@ def main(api_key):
 
     for i in range(2, total_page + 1):
         data = get_json_data(i, api_key)
-        isbn_list.extend(extract_isbn(data))
+        new_isbn_list.extend(extract_isbn(data))
         print(f"success page number: {i}")
 
     # csv 파일 저장
-    output_path = "airflow/data"
-    today = datetime.now().strftime("%Y-%m-%d")
+    output_path = "airflow/scripts/data/isbn"    
     os.makedirs(output_path, exist_ok=True)
-    csv_filename = os.path.join(output_path, f"{today}.csv")
+    csv_filename = os.path.join(output_path, f"raw+isbn+{today}+new.csv")
 
-    save_to_csv(isbn_list, csv_filename)
+    save_to_csv(new_isbn_list, csv_filename)
 
     print(f"complete to save {today}.csv")
 
 
 if __name__ == "__main__":
-    load_dotenv()  # env 파일 로드
     # 추후 airflow 환경의 날짜를 가지고 와 해당 날짜를 조회하도록 수정 예정
     today = datetime.now().strftime("%Y-%m-%d")
-
-    api_key = os.getenv("TTB_KEY")
-    isbn_list = main(api_key)
+    main()

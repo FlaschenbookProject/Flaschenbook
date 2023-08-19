@@ -1,4 +1,4 @@
-from utils.connetions import get_s3_client
+from utils.connections import get_s3_client
 import pandas as pd
 import os
 from io import StringIO
@@ -115,6 +115,17 @@ def fetch_api_data(isbn_list, site):
                 "query": isbn,
                 "target": "isbn"
             }
+        elif site == 'aladin':
+            url = "http://www.aladin.co.kr/ttb/api/ItemLookUp.aspx"
+            aladin_rest_api_key = os.environ.get("TTB_KEY")
+            params = {
+                "ttbkey": aladin_rest_api_key,
+                "itemIdType": "ISBN13",
+                "ItemId": isbn,
+                "output": "JS",
+                "Version": 20131101,
+                "OptResult": "bestSellerRank"
+            }
 
         if site == 'naver':
             time.sleep(0.2)
@@ -132,7 +143,10 @@ def fetch_api_data(isbn_list, site):
         elif site == 'kakao' and book_info['meta']['total_count'] == 0:
             print(f'{site} {i}번째 book info 없음')
             continue
-
+        elif site == 'aladin' and book_info['errorCode'] == 8:
+            print(f'{site} {i}번째 book info 없음')
+            continue
+            
         books['items'].append(book_info)
         print(f'{site} {i}번째 book info 수집')
 
