@@ -1,16 +1,36 @@
+from typing import List
 from utils.connections import get_s3_client
 import os
 import glob
 import pandas as pd
 
 
-# csv를 저장
-def save_to_csv(isbn_list, filename):
-    df = pd.DataFrame({"ISBN": isbn_list})  # 데이터프레임 생성
+def save_to_csv(isbn_list: List[str], filename: str) -> None:
+    """
+    ISBN 리스트를 받아서 CSV 파일로 저장합니다.
+
+    Args:
+        isbn_list (List[str]): ISBN 번호의 리스트
+        filename (str): 저장할 CSV 파일명
+
+    Returns:
+        None
+    """
+    df = pd.DataFrame({"ISBN": isbn_list})
     df.to_csv(filename, index=False)
 
 
-def upload_files_to_s3(bucket_name, source_directory):
+def upload_files_to_s3(bucket_name: str, source_directory: str) -> None:
+    """
+    지정된 디렉토리의 파일들을 Amazon S3 버킷에 업로드합니다.
+
+    Args:
+        bucket_name (str): 대상 S3 버킷 이름
+        source_directory (str): 업로드할 파일들이 있는 소스 디렉토리
+
+    Returns:
+        None
+    """
     s3_client = get_s3_client()
 
     if not source_directory.endswith('/'):
@@ -24,13 +44,24 @@ def upload_files_to_s3(bucket_name, source_directory):
             s3_client.upload_file(file_path, bucket_name, object_key)
             print(f"Uploaded {file_name} to {bucket_name}/{object_key}")
             os.remove(file_path)
-  
-                      
-def get_file_cnt(bucket_name, source_directory):
+
+
+def get_file_cnt(bucket_name: str, source_directory: str) -> int:
+    """
+    지정된 S3 버킷의 디렉토리에 있는 파일 수를 반환합니다.
+
+    Args:
+        bucket_name (str): S3 버킷 이름
+        source_directory (str): 파일 수를 확인할 S3 디렉토리
+
+    Returns:
+        int: 디렉토리에 있는 파일 수. 오류가 발생할 경우 -1을 반환한다.
+    """
     s3_client = get_s3_client()
-    
+
     try:
-        response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=source_directory)
+        response = s3_client.list_objects_v2(
+            Bucket=bucket_name, Prefix=source_directory)
         file_count = len(response.get('Contents', []))
         print(f"폴더 '{source_directory}'에 있는 파일 수: {file_count} 개")
         return file_count
