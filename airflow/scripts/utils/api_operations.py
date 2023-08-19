@@ -13,6 +13,7 @@ def get_isbn_list(bucket_name, object_key):
     response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
     csv_content = response['Body'].read().decode('utf-8')
     df = pd.read_csv(StringIO(csv_content))
+    df['ISBN'] = df['ISBN'].astype(str).str.split('.').str[0]
     return df['ISBN'].tolist()
 
 
@@ -102,9 +103,6 @@ def fetch_api_data(isbn_list, site):
         }
 
     for i, isbn in enumerate(isbn_list):
-        if site == 'naver' and len(isbn) == 10:
-            continue
-
         if site == 'naver':
             params = {
                 "query": isbn,
@@ -128,7 +126,7 @@ def fetch_api_data(isbn_list, site):
             }
 
         if site == 'naver':
-            time.sleep(0.2)
+            time.sleep(0.1)
 
         try:
             response = requests.get(url, headers=headers, params=params)
@@ -138,16 +136,16 @@ def fetch_api_data(isbn_list, site):
 
         book_info = response.json()
         if site == 'naver' and book_info['total'] == 0:
-            print(f'{site} {i}번째 book info 없음')
+            print(f'{site} {i} 번째 {isbn} book info 없음!')
             continue
         elif site == 'kakao' and book_info['meta']['total_count'] == 0:
-            print(f'{site} {i}번째 book info 없음')
+            print(f'{site} {i} 번째 {isbn} book info 없음!')
             continue
         elif site == 'aladin' and book_info['errorCode'] == 8:
-            print(f'{site} {i}번째 book info 없음')
+            print(f'{site} {i} 번째 {isbn} book info 없음!')
             continue
-            
+
         books['items'].append(book_info)
-        print(f'{site} {i}번째 book info 수집')
+        print(f'{site} {i} 번째 {isbn} book info 수집')
 
     return books
