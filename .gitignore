@@ -18,6 +18,7 @@ venv
 # Other unnecessary files
 .DS_Store
 airflow/scripts/data/*
+airflow/data/*
 
 # Dependencies
 /node_modules

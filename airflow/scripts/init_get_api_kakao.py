@@ -6,6 +6,7 @@ from utils.file_operations import upload_files_to_s3
 from utils.api_operations import get_isbn_list
 from utils.api_operations import get_headers
 from utils.api_operations import save_json_file
+from utils.file_operations import get_file_cnt
 
 load_dotenv()
 BUCKET_NAME = os.environ.get("BUCKET_NAME")
@@ -43,24 +44,25 @@ def fetch_kakao_api_data(isbn_list):
 
         book_info = response.json()
         if book_info.get("total") == 0:
-            print(f'naver {i} 번째 {isbn} book info 없음!')
+            print(f'{site} {i} 번째 {isbn} book info 없음!')
             continue
 
         books['items'].append(book_info)
         valid_isbn_cnt += 1
-        print(f'naver {i} 번째 {isbn} book info 수집, 현재 {valid_isbn_cnt}개')
+        print(f'{site} {i} 번째 {isbn} book info 수집, 현재 {valid_isbn_cnt}개')
 
     return books
 
 
 def main():
-    file_cnt = 20
+    object_path = f'raw/isbn/{TODAY}/init/'
+    file_cnt = get_file_cnt(BUCKET_NAME, object_path)
 
     for i in range(1, file_cnt + 1):
-        isbn_object_key = f"{source_dir}isbn/raw+isbn+{TODAY}+init+{i}.csv"
+        isbn_object_key = f'raw/isbn/{TODAY}/init/{i}.csv'
         isbn_list = get_isbn_list(BUCKET_NAME, isbn_object_key)
-        json_file_path = f"{source_dir}{site}/raw+book_info+{site}+{TODAY}+init+books_{i}.json"
         books = fetch_kakao_api_data(isbn_list)
+        json_file_path = f"{source_dir}{site}/raw+book_info+{site}+{TODAY}+init+books_{i}.json"
         save_json_file(json_file_path, books)
         upload_files_to_s3(BUCKET_NAME, f'{source_dir}{site}/')
 
