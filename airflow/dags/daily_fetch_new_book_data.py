@@ -9,7 +9,7 @@ import os
 def create_fetch_new_book_dag(site):
     with BaseDAG(
         dag_id=f'daily_fetch_new_book_{site}',
-        description='Fetch data from Naver API using Docker',
+        description=f'Fetch data from {site} API',
         schedule_interval=timedelta(days=1),
         catchup=False,
         start_date=datetime(2023, 1, 1)
@@ -18,12 +18,13 @@ def create_fetch_new_book_dag(site):
         load_dotenv()
         environment = os.environ
         date = os.environ["TODAY"] = '{{ ds }}'
-        os.environ["BOOK_SITE"] = site
+        image = os.environ.get("SCRIPT_IMAGE")
         object_key = f'raw/book_info/{site}/{date}/new.json'
+        os.environ["BOOK_SITE"] = site
 
         fetch_api_data = DockerOperator(
             task_id='fetch_api_data',
-            image='dbwjd090/flaschenbook-script:latest',
+            image=image,
             container_name='fetch_api_data',
             api_version='auto',
             auto_remove=True,
@@ -48,5 +49,4 @@ def create_fetch_new_book_dag(site):
 sites = ['aladin', 'kakao', 'naver']
 for site in sites:
     dag_id = f'daily_fetch_new_book_{site}'
-    globals()[dag_id] = create_fetch_new_book_dag(
-        site)
+    globals()[dag_id] = create_fetch_new_book_dag(site)
