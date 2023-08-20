@@ -1,5 +1,4 @@
 import requests
-import json
 import os
 from datetime import date
 from dotenv import load_dotenv
@@ -8,6 +7,7 @@ from utils.api_operations import get_isbn_list
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from utils.file_operations import get_file_cnt
+from utils.api_operations import save_json_file
 
 
 def fetch_api_data(isbn_list, api_keys):
@@ -30,7 +30,7 @@ def fetch_api_data(isbn_list, api_keys):
         }
 
         # 최대 3번까지 재시도, 간격은 1초씩 증가
-        retry = Retry(total=3, backoff_factor=1)
+        retry = Retry(total=3, connect=0.01, backoff_factor=1)
 
         # 재시도를 하기 위한 http 연결 관리
         adapter = HTTPAdapter(max_retries=retry)
@@ -55,32 +55,43 @@ def fetch_api_data(isbn_list, api_keys):
         if book_info.get('errorCode') == 8:
             print(f'{i}번째 book info 없음 isbn: {isbn}')
             continue
+        if book_info.get('errorCode') == 10:
+            cnt += 1
+            print(f'{api_keys[cnt]} key 종료')
+            continue
         print(f'{i}번째 book info 수집')
         books['items'].append(book_info)
 
     return books
 
 
+def save_json():
+    BUCKET_NAME = os.environ.get("BUCKET_NAME")
+    SITE = "aladin"
+    TODAY = date.today().strftime("%Y-%m-%d")
+    # TODAY = "2023-08-16"
+    
+    isbn_keys = [os.environ.get("TTB_KEY"), os.environ.get("TTB_KEY2"), os.environ.get("TTB_KEY3"), os.environ.get("TTB_KEY4"), os.environ.get("TTB_KEY5"), os.environ.get("TTB_KEY6"), os.environ.get("TTB_KEY7"), os.environ.get("TTB_KEY8"), os.environ.get("TTB_KEY9"), os.environ.get("TTB_KEY10")]
+
+    csv_file_dir = f'raw/isbn/{TODAY}/init/'
+    # csv 파일 개수를 조회 
+    # for문 돌면서 해당 file_num의 파일에 접근해 isbn 처리
+    total_file_num = get_file_cnt(BUCKET_NAME, csv_file_dir)
+    
+    for i in range(7, total_file_num + 1):
+        source_dir = f'airflow/scripts/data/{SITE}/'
+        isbn_object_key = f'raw/isbn/{TODAY}/init/{i}.csv'
+        isbn_list = get_isbn_list(BUCKET_NAME, isbn_object_key)
+        books = fetch_api_data(isbn_list, isbn_keys)
+        
+        json_file_path = f"{source_dir}{SITE}/raw+book_info+{SITE}+{TODAY}+init+books_{i}.json"
+        save_json_file(json_file_path, books)
+        upload_files_to_s3(BUCKET_NAME, f'{source_dir}{SITE}/')
+
+
 def main():
     load_dotenv()  # env 파일 로드
-    BUCKET_NAME = os.environ.get("BUCKET_NAME")
-    #TODAY = date.today().strftime("%Y-%m-%d")
-    TODAY = "2023-08-16"
-    
-    source_directory = f'raw/isbn/{TODAY}/init/'
-    site = "aladin"
-    isbn_keys = [os.environ.get("TTB_KEY"), os.environ.get("TTB_KEY2"), os.environ.get("TTB_KEY3"), os.environ.get("TTB_KEY4"), os.environ.get("TTB_KEY5")]
-    
-    file_cnt = get_file_cnt(BUCKET_NAME, source_directory)
-    
-    source_dir = f'airflow/scripts/data/{site}/'
-    file_path = f"{source_dir}raw+book_info+{site}+{TODAY}+init+books.json"
-    isbn_list = get_isbn_list(BUCKET_NAME, source_directory)
-      
-    books = fetch_api_data(isbn_list, isbn_keys)
-    with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(books, f, ensure_ascii=False, indent=4)
-    upload_files_to_s3(BUCKET_NAME, source_dir)
+    save_json()
 
 
 if __name__ == "__main__":
