@@ -16,7 +16,7 @@ variable "s3_bucket" {
 }
 
 variable "fernet_key"{
-   default= "H8JoQIyBvIvef1V_tootxuU1K_4iQ2PNsb4RV33jX_0="
+   default= "fernet_key"
 }
 
 variable "profile" {
