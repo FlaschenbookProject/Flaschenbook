@@ -1,5 +1,6 @@
 import requests
 import os
+import json
 from datetime import date
 from dotenv import load_dotenv
 from utils.file_operations import upload_files_to_s3
@@ -50,8 +51,15 @@ def fetch_api_data(isbn_list, api_keys):
                 continue
             else:
                 print(f"Error while fetching data: {e}")
-
-        book_info = response.json()
+                
+        try:       
+            # book_info = response.json()
+            book_info = json.loads(response.text, strict=False)
+            
+        except json.decoder.JSONDecodeError as e:
+            print(f"JSONDecodeError occurred for ISBN: {isbn}")
+            print(f"Error message: {e}")
+                
         if book_info.get('errorCode') == 8:
             print(f'{i}번째 book info 없음 isbn: {isbn}')
             continue
@@ -78,7 +86,7 @@ def save_json():
     # for문 돌면서 해당 file_num의 파일에 접근해 isbn 처리
     total_file_num = get_file_cnt(BUCKET_NAME, csv_file_dir)
     
-    for i in range(7, total_file_num + 1):
+    for i in range(1, total_file_num + 1):
         source_dir = f'airflow/scripts/data/{SITE}/'
         isbn_object_key = f'raw/isbn/{TODAY}/init/{i}.csv'
         isbn_list = get_isbn_list(BUCKET_NAME, isbn_object_key)
