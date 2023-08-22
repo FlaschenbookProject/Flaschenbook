@@ -22,6 +22,11 @@ def create_fetch_new_book_dag(site):
         environment = os.environ
         date = os.environ["TODAY"] = '{{ ds }}'
         os.environ["BOOK_SITE"] = site
+        os.environ["NAVER_CLIENT_ID"] = Variable.get("naver_client_id")
+        os.environ["NAVER_CLIENT_SECRET"] = Variable.get("naver_client_secret")
+        os.environ["KAKAO_REST_API_KEY"] = Variable.get("kakao_rest_api_key")
+        os.environ["TTB_KEY"] = Variable.get("ttb_api_key")
+
         object_key = f'raw/book_info/{site}/{date}/new.json'
 
         fetch_api_data = DockerOperator(
