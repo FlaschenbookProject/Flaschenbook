@@ -1,24 +1,21 @@
-import logo from './logo.svg';
-import './App.css';
-import { useEffect, useState } from 'react';
- 
- 
+import logo from "./logo.svg";
+import "./App.css";
+import { useEffect, useState } from "react";
+
 function App() {
-  const [message, setMessage] = useState("")
- 
-  useEffect(()=>{
-    fetch("/test")
-      .then(res => res.text())
-      .then(m=>setMessage(m))
-  }, [])
- 
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    fetch("/api/test")
+      .then((res) => res.text())
+      .then((m) => setMessage(m));
+  }, []);
+
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          {message}
-        </p>
+        <p>{message}</p>
         <a
           className="App-link"
           href="https://reactjs.org"
@@ -31,5 +28,5 @@ function App() {
     </div>
   );
 }
- 
+
 export default App;
