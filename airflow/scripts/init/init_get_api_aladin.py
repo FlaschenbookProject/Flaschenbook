@@ -17,7 +17,7 @@ def fetch_api_data(isbn_list, api_keys):
     params = {}
     books = {'items': []}
     cnt = 0
-    
+
     for i, isbn in enumerate(isbn_list):
         url = "http://www.aladin.co.kr/ttb/api/ItemLookUp.aspx"
         aladin_rest_api_key = api_keys[cnt]
@@ -51,15 +51,15 @@ def fetch_api_data(isbn_list, api_keys):
                 continue
             else:
                 print(f"Error while fetching data: {e}")
-                
-        try:       
+
+        try:
             # book_info = response.json()
             book_info = json.loads(response.text, strict=False)
-            
+
         except json.decoder.JSONDecodeError as e:
             print(f"JSONDecodeError occurred for ISBN: {isbn}")
             print(f"Error message: {e}")
-                
+
         if book_info.get('errorCode') == 8:
             print(f'{i}번째 book info 없음 isbn: {isbn}')
             continue
@@ -78,20 +78,20 @@ def save_json():
     SITE = "aladin"
     TODAY = date.today().strftime("%Y-%m-%d")
     # TODAY = "2023-08-16"
-    
-    isbn_keys = [os.environ.get("TTB_KEY2"), os.environ.get("TTB_KEY3"), os.environ.get("TTB_KEY4"), os.environ.get("TTB_KEY5"), os.environ.get("TTB_KEY6"), os.environ.get("TTB_KEY7"), os.environ.get("TTB_KEY8"), os.environ.get("TTB_KEY9"), os.environ.get("TTB_KEY10"), os.environ.get("TTB_KEY11")]
+
+    isbn_keys = [os.environ.get(f"TTB_KEY{i}") for i in range(2, 12)]
 
     csv_file_dir = f'raw/isbn/{TODAY}/init/'
-    # csv 파일 개수를 조회 
+    # csv 파일 개수를 조회
     # for문 돌면서 해당 file_num의 파일에 접근해 isbn 처리
     total_file_num = get_file_cnt(BUCKET_NAME, csv_file_dir)
-    
+
     for i in range(1, total_file_num + 1):
         source_dir = f'airflow/scripts/data/{SITE}/'
         isbn_object_key = f'raw/isbn/{TODAY}/init/{i}.csv'
         isbn_list = get_isbn_list(BUCKET_NAME, isbn_object_key)
         books = fetch_api_data(isbn_list, isbn_keys)
-        
+
         json_file_path = f"{source_dir}{SITE}/raw+book_info+{SITE}+{TODAY}+init+books_{i}.json"
         save_json_file(json_file_path, books)
         upload_files_to_s3(BUCKET_NAME, f'{source_dir}{SITE}/')

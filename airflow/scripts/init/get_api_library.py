@@ -16,7 +16,7 @@ def get_json_data(page_no, lib_key):
         "page_size": 500,
         "ebook_yn": "N",
         "page_no": page_no
-    } 
+    }
     retry = Retry(total=3, backoff_factor=1)  # 최대 3번까지 재시도, 간격은 1초씩 증가
     adapter = HTTPAdapter(max_retries=retry)  # 재시도를 하기 위한 http 연결 관리
     http = requests.Session()
@@ -75,7 +75,7 @@ def main():
     # csv 파일 저장
     output_path = "airflow/data"
     today = datetime.now().strftime("%Y-%m-%d")
-    
+
     os.makedirs(output_path, exist_ok=True)
     csv_filename = os.path.join(output_path, f"{today}_init.csv")
 
