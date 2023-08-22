@@ -79,7 +79,7 @@ def save_json():
     TODAY = date.today().strftime("%Y-%m-%d")
     # TODAY = "2023-08-16"
     
-    isbn_keys = [os.environ.get("TTB_KEY"), os.environ.get("TTB_KEY2"), os.environ.get("TTB_KEY3"), os.environ.get("TTB_KEY4"), os.environ.get("TTB_KEY5"), os.environ.get("TTB_KEY6"), os.environ.get("TTB_KEY7"), os.environ.get("TTB_KEY8"), os.environ.get("TTB_KEY9"), os.environ.get("TTB_KEY10")]
+    isbn_keys = [os.environ.get("TTB_KEY2"), os.environ.get("TTB_KEY3"), os.environ.get("TTB_KEY4"), os.environ.get("TTB_KEY5"), os.environ.get("TTB_KEY6"), os.environ.get("TTB_KEY7"), os.environ.get("TTB_KEY8"), os.environ.get("TTB_KEY9"), os.environ.get("TTB_KEY10"), os.environ.get("TTB_KEY11")]
 
     csv_file_dir = f'raw/isbn/{TODAY}/init/'
     # csv 파일 개수를 조회 
