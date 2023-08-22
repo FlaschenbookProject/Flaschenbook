@@ -8,37 +8,37 @@ resource "aws_alb" "airflow_alb" {
 }
 
 resource "aws_alb_target_group" "airflow_web_server" {
-    name        = "${var.project_name}-${var.stage}-web-server"
-    port        = 8080
-    protocol    = "HTTP"
-    vpc_id      = aws_vpc.vpc.id
-    target_type = "ip"
+  name        = "${var.project_name}-${var.stage}-web-server"
+  port        = 8080
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.vpc.id
+  target_type = "ip"
 
-    health_check {
-        interval = 10
-        port = 8080
-        protocol = "HTTP"
-        path = "/health"
-        timeout = 5
-        healthy_threshold = 5
-        unhealthy_threshold = 3
-    }
-    tags = {
+  health_check {
+    interval            = 10
+    port                = 8080
+    protocol            = "HTTP"
+    path                = "/health"
+    timeout             = 5
+    healthy_threshold   = 5
+    unhealthy_threshold = 3
+  }
+  tags = {
     Name = "${var.project_name}-${var.stage}-webserver-tg"
-    }
+  }
 }
 
 # port exposed from the application load balancer
 resource "aws_alb_listener" "airflow_web_server" {
-    load_balancer_arn = aws_alb.airflow_alb.id
-    port = "80"
-    protocol = "HTTP"
+  load_balancer_arn = aws_alb.airflow_alb.id
+  port              = "80"
+  protocol          = "HTTP"
 
-    default_action {
-        target_group_arn = aws_alb_target_group.airflow_web_server.id
-        type = "forward"
-    }
-    tags = {
+  default_action {
+    target_group_arn = aws_alb_target_group.airflow_web_server.id
+    type             = "forward"
+  }
+  tags = {
     Name = "${var.project_name}-${var.stage}-webserver-listener"
-    }
+  }
 }

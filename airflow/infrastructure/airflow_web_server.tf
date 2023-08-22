@@ -1,63 +1,63 @@
 resource "aws_security_group" "application_load_balancer" {
-    name = "${var.project_name}-${var.stage}-alb-web-sg"
-    description = "Allow all inbound traffic"
-    vpc_id = aws_vpc.vpc.id
+  name        = "${var.project_name}-${var.stage}-alb-web-sg"
+  description = "Allow all inbound traffic"
+  vpc_id      = aws_vpc.vpc.id
 
-    ingress {
-        from_port   = 80
-        to_port     = 80
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-    egress {
-        from_port       = 0
-        to_port         = 0
-        protocol        = "-1"
-        cidr_blocks     = ["0.0.0.0/0"]
-    }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-    tags = {
-        Name = "${var.project_name}-${var.stage}-alb-web-sg"
-    }
+  tags = {
+    Name = "${var.project_name}-${var.stage}-alb-web-sg"
+  }
 }
 
 
 resource "aws_security_group" "web_server_ecs_internal" {
-    name = "${var.project_name}-${var.stage}-web-server-ecs-internal-sg"
-    description = "Allow all inbound traffic"
-    vpc_id = aws_vpc.vpc.id
+  name        = "${var.project_name}-${var.stage}-web-server-ecs-internal-sg"
+  description = "Allow all inbound traffic"
+  vpc_id      = aws_vpc.vpc.id
 
-    ingress {
-        from_port   = 8080
-        to_port     = 8080
-        protocol    = "tcp"
-        security_groups = [aws_security_group.application_load_balancer.id]
-        cidr_blocks = ["0.0.0.0/0"]
-    }
+  ingress {
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.application_load_balancer.id]
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
 
-    egress {
-        from_port       = 0
-        to_port         = 0
-        protocol        = "-1"
-        cidr_blocks     = ["0.0.0.0/0"]
-    }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-    tags = {
-        Name = "${var.project_name}-${var.stage}-web-server-ecs-internal-sg"
-    }
+  tags = {
+    Name = "${var.project_name}-${var.stage}-web-server-ecs-internal-sg"
+  }
 }
 
 
 resource "aws_ecs_task_definition" "web_server" {
   family = "${var.project_name}-${var.stage}-web-server"
   # container_definitions = file("airflow-components/web_server.json")
-  network_mode = "awsvpc"
-  execution_role_arn = aws_iam_role.ecs_task_iam_role.arn
+  network_mode             = "awsvpc"
+  execution_role_arn       = aws_iam_role.ecs_task_iam_role.arn
   requires_compatibilities = ["FARGATE"]
-  cpu = "2048" # the valid CPU amount for 2 GB is from from 256 to 1024
-  memory = "4096"
-  container_definitions = <<EOF
+  cpu                      = "2048" # the valid CPU amount for 2 GB is from from 256 to 1024
+  memory                   = "4096"
+  container_definitions    = <<EOF
 [
   {
     "name": "airflow_web_server",
@@ -129,7 +129,7 @@ resource "aws_ecs_task_definition" "web_server" {
   }
 ]
 EOF
-tags = {
-  Name = "${var.project_name}-${var.stage}-ecs_task_def-webserver"
-}
+  tags = {
+    Name = "${var.project_name}-${var.stage}-ecs_task_def-webserver"
+  }
 }

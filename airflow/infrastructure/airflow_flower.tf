@@ -1,36 +1,36 @@
 resource "aws_security_group" "flower" {
-    name = "${var.project_name}-${var.stage}-flower-sg"
-    description = "Allow all inbound traffic for Flower"
-    vpc_id = aws_vpc.vpc.id
+  name        = "${var.project_name}-${var.stage}-flower-sg"
+  description = "Allow all inbound traffic for Flower"
+  vpc_id      = aws_vpc.vpc.id
 
-    ingress {
-        from_port = 5555
-        to_port = 5555
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
+  ingress {
+    from_port   = 5555
+    to_port     = 5555
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-    egress {
-        from_port = 0
-        to_port = 0
-        protocol = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-    tags = {
-        Name = "${var.project_name}-${var.stage}-flower-sg"
-    }
+  tags = {
+    Name = "${var.project_name}-${var.stage}-flower-sg"
+  }
 }
 
 
 resource "aws_ecs_task_definition" "flower" {
-  family = "${var.project_name}-${var.stage}-flower"
-  network_mode = "awsvpc"
-  execution_role_arn = aws_iam_role.ecs_task_iam_role.arn
+  family                   = "${var.project_name}-${var.stage}-flower"
+  network_mode             = "awsvpc"
+  execution_role_arn       = aws_iam_role.ecs_task_iam_role.arn
   requires_compatibilities = ["FARGATE"]
-  cpu = "1024" # the valid CPU amount for 2 GB is from from 256 to 1024
-  memory = "2048"
-  container_definitions = <<EOF
+  cpu                      = "1024" # the valid CPU amount for 2 GB is from from 256 to 1024
+  memory                   = "2048"
+  container_definitions    = <<EOF
 [
   {
     "name": "airflow_flower",
@@ -102,7 +102,7 @@ resource "aws_ecs_task_definition" "flower" {
   }
 ]
 EOF
-tags = {
-  Name = "${var.project_name}-${var.stage}-ecs_task_def-flower"
-}
+  tags = {
+    Name = "${var.project_name}-${var.stage}-ecs_task_def-flower"
+  }
 }

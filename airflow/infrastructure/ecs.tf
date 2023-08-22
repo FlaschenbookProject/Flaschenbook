@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "docker_repository" {
-    name = "${var.project_name}-${var.stage}"
+  name = "${var.project_name}-${var.stage}"
   tags = {
     Name = "${var.project_name}-${var.stage}-aws_ecr_repository-docker_repository"
   }
@@ -36,12 +36,12 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 }
 
 resource "aws_cloudwatch_log_group" "log_group" {
-  name = "${var.log_group_name}/${var.project_name}-${var.stage}"
+  name              = "${var.log_group_name}/${var.project_name}-${var.stage}"
   retention_in_days = 5
 }
 
 resource "aws_iam_role" "ecs_task_iam_role" {
-  name = "${var.project_name}-${var.stage}-ecs-task-role"
+  name        = "${var.project_name}-${var.stage}-ecs-task-role"
   description = "Allow ECS tasks to access AWS resources"
 
   assume_role_policy = <<EOF
@@ -60,14 +60,14 @@ resource "aws_iam_role" "ecs_task_iam_role" {
 }
 EOF
   tags = {
-    Name = "${var.project_name}-${var.stage}-iam-role",
+    Name    = "${var.project_name}-${var.stage}-iam-role",
     project = "${var.project_name}"
   }
 }
 
 
 resource "aws_iam_policy" "ecs_task_policy" {
-  name        = "${var.project_name}-${var.stage}"
+  name = "${var.project_name}-${var.stage}"
 
   policy = <<EOF
 {
@@ -110,7 +110,7 @@ resource "aws_iam_policy" "ecs_task_policy" {
   ]
 }
 EOF
-tags = {
+  tags = {
     Name = "${var.project_name}-${var.stage}-iam-policy"
   }
 }

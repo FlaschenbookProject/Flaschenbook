@@ -1,29 +1,29 @@
 resource "aws_security_group" "scheduler" {
-    name = "${var.project_name}-${var.stage}-scheduler-sg"
-    description = "Airflow scheduler security group"
-    vpc_id = aws_vpc.vpc.id
+  name        = "${var.project_name}-${var.stage}-scheduler-sg"
+  description = "Airflow scheduler security group"
+  vpc_id      = aws_vpc.vpc.id
 
-    egress {
-        from_port       = 0
-        to_port         = 0
-        protocol        = "-1"
-        cidr_blocks     = ["0.0.0.0/0"]
-    }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-    tags = {
-        Name = "${var.project_name}-${var.stage}-scheduler-sg"
-    }
+  tags = {
+    Name = "${var.project_name}-${var.stage}-scheduler-sg"
+  }
 }
 
 
 resource "aws_ecs_task_definition" "scheduler" {
-  family = "${var.project_name}-${var.stage}-scheduler"
-  network_mode = "awsvpc"
-  execution_role_arn = aws_iam_role.ecs_task_iam_role.arn
+  family                   = "${var.project_name}-${var.stage}-scheduler"
+  network_mode             = "awsvpc"
+  execution_role_arn       = aws_iam_role.ecs_task_iam_role.arn
   requires_compatibilities = ["FARGATE"]
-  cpu = "1024" # the valid CPU amount for 2 GB is from from 256 to 1024
-  memory = "2048"
-  container_definitions = <<EOF
+  cpu                      = "1024" # the valid CPU amount for 2 GB is from from 256 to 1024
+  memory                   = "2048"
+  container_definitions    = <<EOF
 [
   {
     "name": "airflow_scheduler",
@@ -89,7 +89,7 @@ resource "aws_ecs_task_definition" "scheduler" {
   }
 ]
 EOF
-tags = {
-  Name = "${var.project_name}-${var.stage}-ecs_task_def-scheduler"
-}
+  tags = {
+    Name = "${var.project_name}-${var.stage}-ecs_task_def-scheduler"
+  }
 }
