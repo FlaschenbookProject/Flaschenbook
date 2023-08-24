@@ -1,0 +1,12 @@
+# Use an official Airflow image as the base
+ARG AIRFLOW_VERSION=2.6.2
+FROM apache/airflow:${AIRFLOW_VERSION}	
+
+USER airflow
+
+ADD requirements.txt .
+RUN pip install apache-airflow==${AIRFLOW_VERSION} -r requirements.txt
+
+ENV AIRFLOW_HOME=/opt/airflow
+
+EXPOSE 8080
