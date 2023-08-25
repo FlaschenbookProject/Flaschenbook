@@ -24,7 +24,9 @@ def get_isbn_list(bucket_name: str, object_key: str) -> List[str]:
     response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
     csv_content = response['Body'].read().decode('utf-8')
     df = pd.read_csv(StringIO(csv_content))
+    df = df.dropna(subset=['ISBN'])
     df['ISBN'] = df['ISBN'].astype(str).str.split('.').str[0]
+
     return df['ISBN'].tolist()
 
 
