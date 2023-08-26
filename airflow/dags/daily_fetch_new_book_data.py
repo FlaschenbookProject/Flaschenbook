@@ -2,9 +2,18 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from airflow.providers.docker.operators.docker import DockerOperator
 from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
+from airflow.operators.python import PythonOperator
 from base.base_dag import BaseDAG
 from airflow.models import Variable
 import os
+
+
+def get_execution_date(**kwargs):
+    execution_date = kwargs['execution_date']
+    date = execution_date.strftime('%Y-%m-%d')
+    print(f"{date} 실행")
+
+    kwargs['ti'].xcom_push(key='TODAY', value=date)
 
 
 def create_fetch_new_book_dag(site):
@@ -20,13 +29,21 @@ def create_fetch_new_book_dag(site):
         script_image = Variable.get("script_image")
         bucket_name = Variable.get("bucket_name")
         environment = os.environ
-        date = os.environ["TODAY"] = '{{ ds }}'
+
         os.environ["BOOK_SITE"] = site
         os.environ["NAVER_CLIENT_ID"] = Variable.get("naver_client_id")
         os.environ["NAVER_CLIENT_SECRET"] = Variable.get("naver_client_secret")
         os.environ["KAKAO_REST_API_KEY"] = Variable.get("kakao_rest_api_key")
         os.environ["TTB_KEY"] = Variable.get("ttb_api_key")
 
+        execution_date_task = PythonOperator(
+            task_id='execution_date_task',
+            python_callable=get_execution_date,
+            provide_context=True,
+            dag=dag
+        )
+        
+        date = "{{ ti.xcom_pull(task_ids='get_execution_date', key='TODAY') }}"
         object_key = f'raw/book_info/{site}/{date}/new.json'
 
         fetch_api_data = DockerOperator(
@@ -48,7 +65,9 @@ def create_fetch_new_book_dag(site):
             poke_interval=10 * 60,
         )
 
-        fetch_api_data >> check_file_exists
+        check_file_exists.log.info(f'Checking for file: {f"s3://{bucket_name}/{object_key}"}')
+
+        execution_date_task >> fetch_api_data >> check_file_exists
 
     return dag
 
