@@ -18,7 +18,6 @@ def main():
     load_dotenv()
 
     BUCKET_NAME = os.environ.get("BUCKET_NAME")
-    BOOK_SITE = os.environ.get("BOOK_SITE")
 
     # TODAY를 환경 변수가 아닌 시스템 변수로 수정
     if len(sys.argv) < 2:
@@ -26,6 +25,8 @@ def main():
 
     print(sys.argv)
     TODAY = sys.argv[1]
+    BOOK_SITE = sys.argv[2]
+    print(BOOK_SITE)
 
     isbn_object_key = f"raw/isbn/{TODAY}/new.csv"
     source_dir = f"data/{BOOK_SITE}/"
