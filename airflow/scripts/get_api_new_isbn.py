@@ -57,7 +57,6 @@ def main():
     if len(sys.argv) < 2:
         sys.exit(1)
 
-    print(sys.argv)
     today = sys.argv[1]
     print(f"{today} New Book")
 

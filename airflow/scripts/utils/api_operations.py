@@ -182,13 +182,21 @@ def fetch_api_data(isbn_list: List[str], site: str) -> Dict[str, Dict]:
             print(f"Error while fetching data: {e}")
 
         book_info = response.json()
-        if site == 'naver' and book_info['total'] == 0:
+
+        # book_info가 None인 경우 모든 웹사이트에 대해 확인할 필요 없음
+        if book_info is None:
             print(f'{site} {i} 번째 {isbn} book info 없음!')
             continue
-        elif site == 'kakao' and book_info['meta']['total_count'] == 0:
+
+        # key가 없는 경우를 대비해 get으로 수정
+        if site == 'naver' and book_info.get('total') == 0:
             print(f'{site} {i} 번째 {isbn} book info 없음!')
             continue
-        elif site == 'aladin' and book_info['errorCode'] == 8:
+        elif site == 'kakao':
+            if book_info.get('meta') is None or book_info.get('meta').get('total_count') == 0:
+                print(f'{site} {i} 번째 {isbn} book info 없음!')
+                continue
+        elif site == 'aladin' and book_info.get('errorCode') == 8:
             print(f'{site} {i} 번째 {isbn} book info 없음!')
             continue
 
