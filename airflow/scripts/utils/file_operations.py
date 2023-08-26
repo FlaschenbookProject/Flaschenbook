@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Dict
 from utils.connections import get_s3_client
 import os
 import glob
 import pandas as pd
+import json
 
 
 def save_to_csv(isbn_list: List[str], filename: str) -> None:
@@ -18,6 +19,23 @@ def save_to_csv(isbn_list: List[str], filename: str) -> None:
     """
     df = pd.DataFrame({"ISBN": isbn_list})
     df.to_csv(filename, index=False)
+
+
+def save_json_file(file_path: str, items: Dict[str, Dict]) -> None:
+    """
+    주어진 항목을 JSON 파일로 저장합니다.
+
+    Args:
+        file_path (str): 항목을 저장할 파일 경로
+        items (list or dict): JSON 형식으로 저장할 항목
+    """
+    directory = os.path.dirname(file_path)
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(items, f, ensure_ascii=False, indent=4)
 
 
 def upload_files_to_s3(bucket_name: str, source_directory: str) -> None:
