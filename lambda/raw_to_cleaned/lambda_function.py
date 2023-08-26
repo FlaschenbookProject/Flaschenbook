@@ -2,9 +2,7 @@ import boto3
 import pandas as pd
 import re
 from io import BytesIO
-from transform_data import transform_data_naver
-from transform_data import transform_data_kakao
-from transform_data import transform_data_aladin
+from transform_data import transform_data
 
 
 def lambda_handler(event, context):
@@ -24,15 +22,7 @@ def lambda_handler(event, context):
             raw_object = s3.get_object(Bucket=bucket, Key=raw_key)
             raw_content = raw_object['Body'].read().decode('utf-8')
             site = raw_key.split('/')[2]
-
-            transformed_data = None
-
-            if site == 'naver':
-                transformed_data = transform_data_naver(raw_content)
-            elif site == 'kakao':
-                transformed_data = transform_data_kakao(raw_content)
-            elif site == 'aladin':
-                transformed_data = transform_data_aladin(raw_content)
+            transformed_data = transform_data(raw_content, site)
 
             # parquet로 변환
             df = pd.DataFrame(transformed_data)
