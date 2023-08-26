@@ -2,7 +2,9 @@ version: "3.8"
 x-airflow-common: &airflow-common
   env_file:
     - ../.env
-  build: .
+  build:
+    context: .
+    dockerfile: Dockerfile.dev
   # image: apache/airflow:2.6.2
   environment: &airflow-common-env
     AIRFLOW_UID: 10000
