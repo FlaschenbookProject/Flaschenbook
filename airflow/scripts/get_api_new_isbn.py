@@ -3,7 +3,8 @@ import os
 import sys
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from utils.file_operations import save_to_csv, upload_files_to_s3
+from utils.file_operations import save_to_csv
+from utils.file_operations import upload_files_to_s3
 
 
 # JSON 데이터를 가져오는 함수
