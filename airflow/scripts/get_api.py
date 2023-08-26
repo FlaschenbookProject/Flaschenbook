@@ -1,9 +1,10 @@
 import os
+import sys
 from dotenv import load_dotenv
 from utils.file_operations import upload_files_to_s3
 from utils.api_operations import get_isbn_list
 from utils.api_operations import fetch_api_data
-from utils.api_operations import save_json_file
+from utils.file_operations import save_json_file
 
 
 def main():
@@ -18,7 +19,13 @@ def main():
 
     BUCKET_NAME = os.environ.get("BUCKET_NAME")
     BOOK_SITE = os.environ.get("BOOK_SITE")
-    TODAY = os.environ.get("TODAY")
+
+    # TODAY를 환경 변수가 아닌 시스템 변수로 수정
+    if len(sys.argv) < 2:
+        sys.exit(1)
+
+    print(sys.argv)
+    TODAY = sys.argv[1]
 
     isbn_object_key = f"raw/isbn/{TODAY}/new.csv"
     source_dir = f"data/{BOOK_SITE}/"
