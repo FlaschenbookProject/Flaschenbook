@@ -22,9 +22,9 @@ def scrap_review(isbn_list):
         context = browser.new_context(ignore_https_errors=True)
         page = context.new_page()
 
-        for isbn in isbn_list:
+        for i, isbn in enumerate(isbn_list):
 
-            print(f"{isbn} 스크래핑 시작")
+            print(f"{i + 1}번째 {isbn} 스크래핑 시작")
             print("URL로 이동 중...")
             try:
                 page.goto(
@@ -36,19 +36,30 @@ def scrap_review(isbn_list):
 
             book_detail_url_xpath = 'xpath=//*[@id="shopData_list"]/ul/li/div[1]/div[2]/div[2]/div[1]/div/a'
             # 검색 결과 없으면 넘어감
-            if not page.locator(book_detail_url_xpath).is_visible():
+            try:
+                if not page.locator(book_detail_url_xpath).is_visible():
+                    continue
+                if page.locator('//*[@id="shopData_list"]/ul/li/div[1]/div[1]/a/span').get_attribute("class") == "img_box adult":
+                    continue
+                page.locator(book_detail_url_xpath).click()
+                print("도서 상세페이지 진입 완료")
+            except Exception as e:
+                print(f"Error encountered: {e}")
                 continue
-            page.locator(book_detail_url_xpath).click()
-            print("도서 상세페이지 진입 완료")
 
-            review_cnt_text_xpath = '//*[@id="contents"]/div[2]/div[1]/div/div[1]/ul/li[3]/a/span/span'
-            page.wait_for_selector(review_cnt_text_xpath)
-            review_cnt_text = page.locator(review_cnt_text_xpath).inner_text()
+            try:
+                review_cnt_text_xpath = '//*[@id="contents"]/div[2]/div[1]/div/div[1]/ul/li[3]/a/span/span'
+                page.wait_for_selector(review_cnt_text_xpath)
+                review_cnt_text = page.locator(
+                    review_cnt_text_xpath).inner_text()
 
-            match = re.search(r'\((\d+)\)', review_cnt_text)
-            review_cnt = int(match.group(1)) if match else 0
-            if not review_cnt:
-                print("리뷰가 없습니다!")
+                match = re.search(r'\((\d+)\)', review_cnt_text)
+                review_cnt = int(match.group(1)) if match else 0
+                if not review_cnt:
+                    print("리뷰가 없습니다!")
+                    continue
+            except Exception as e:
+                print(f"Error encountered: {e}")
                 continue
 
             page_num = 1
@@ -105,7 +116,7 @@ def scrap_review(isbn_list):
                     # 결과 출력
                     print(f"review {review_cnt}번째")
                     print(f"rating: {rating}")
-                    print(f"content: {content}")
+                    # print(f"content: {content}")
                     print(f"date: {wrt_date}")
                     print('-' * 50)
 
