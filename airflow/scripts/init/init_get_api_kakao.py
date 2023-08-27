@@ -5,7 +5,7 @@ import requests
 from utils.file_operations import upload_files_to_s3
 from utils.api_operations import get_isbn_list
 from utils.api_operations import get_headers
-from utils.api_operations import save_json_file
+from utils.file_operations import save_json_file
 from utils.file_operations import get_file_cnt
 
 SITE = 'kakao'

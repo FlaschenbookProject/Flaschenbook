@@ -64,7 +64,7 @@ with DAG(
     )
 
     date = "{{ ti.xcom_pull(task_ids='get_execution_date', key='TODAY') }}"
-    object_key = f'raw/isbn/{date}/new.json'
+    object_key = f'raw/isbn/{date}/new.csv'
     print(f"object_key: {object_key}")
 
     get_isbn_data = create_docker_task(
