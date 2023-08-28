@@ -13,8 +13,9 @@ WEBCODE = "KB"
 BOOK_TYPE = "best"
 
 
-def scrap_review(isbn_list):
+def scrap_review_and_content(isbn_list):
     reviews = []
+    contents = []
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
@@ -23,7 +24,6 @@ def scrap_review(isbn_list):
         page = context.new_page()
 
         for i, isbn in enumerate(isbn_list):
-
             print(f"{i + 1}번째 {isbn} 스크래핑 시작")
             print("URL로 이동 중...")
             try:
@@ -46,6 +46,26 @@ def scrap_review(isbn_list):
             except Exception as e:
                 print(f"Error encountered: {e}")
                 continue
+
+            book_content_xpath = '//*[@id="scrollSpyProdInfo"]/div[10]/div[2]/div[1]/div/p'
+            try:
+                print(f"{isbn} 책 속으로 조회 시작")
+                book_content_element = page.locator(book_content_xpath)
+                if book_content_element:
+                    book_content = book_content_element.inner_text()
+                    book_content = book_content.replace('<br>', '\n')
+                else:
+                    print(f"'{isbn}'의 책 속으로가 없습니다.")
+            except Exception as e:
+                print(f"Error encountered: {e}")
+                continue
+
+            if book_content:
+                content_list = book_content.split('\n')
+                for content in content_list:
+                    if content:
+                        content_dict = {'isbn': isbn, 'content': content}
+                        contents.append(content_dict)
 
             try:
                 review_cnt_text_xpath = '//*[@id="contents"]/div[2]/div[1]/div/div[1]/ul/li[3]/a/span/span'
@@ -135,13 +155,16 @@ def scrap_review(isbn_list):
 
             print(f"{isbn} 리뷰 수집 끝!")
         browser.close()
-    return reviews
+    return reviews, contents
 
 
-def upload_to_s3(bucket_name, reviews):
+def upload_to_s3(bucket_name, reviews, type):
     df = pd.DataFrame(reviews)
     fs = s3fs.S3FileSystem(anon=False)
-    bucket_path = f"s3://{bucket_name}/curated/review/{DATE}/{BOOK_TYPE}_book_reviews.parquet"
+    if type == "review":
+        bucket_path = f"s3://{bucket_name}/curated/review/{DATE}/{BOOK_TYPE}_book_reviews_{WEBCODE}.parquet"
+    else:
+        bucket_path = f"s3://{bucket_name}/curated/book_content/{DATE}/{BOOK_TYPE}_book_contents.parquet"
     print(f"{bucket_path} 파일 업로드 시작")
     with fs.open(bucket_path, 'wb') as f:
         df.to_parquet(f)
@@ -153,8 +176,9 @@ def main():
     bucket_name = os.environ.get("BUCKET_NAME")
     isbn_object_key = f"raw/isbn/{DATE}/{BOOK_TYPE}.csv"
     isbn_list = get_isbn_list(bucket_name, isbn_object_key)
-    reviews = scrap_review(isbn_list)
-    upload_to_s3(bucket_name, reviews)
+    reviews, contents = scrap_review_and_content(isbn_list)
+    upload_to_s3(bucket_name, reviews, "review")
+    upload_to_s3(bucket_name, contents, "content")
 
 
 if __name__ == "__main__":
