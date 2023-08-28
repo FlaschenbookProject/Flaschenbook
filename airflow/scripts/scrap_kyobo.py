@@ -47,12 +47,12 @@ def scrap_review_and_content(isbn_list):
                 print(f"Error encountered: {e}")
                 continue
 
-            book_content_xpath = '//*[@id="scrollSpyProdInfo"]/div[10]/div[2]/div[1]/div/p'
+            book_content = ""
             try:
                 print(f"{isbn} 책 속으로 조회 시작")
-                book_content_element = page.locator(book_content_xpath)
-                if book_content_element:
-                    book_content = book_content_element.inner_text()
+                if page.locator('.product_detail_area.book_inside').count() > 0:
+                    # 책 속으로가 존재하는 경우에만 텍스트를 추출하고 출력
+                    book_content = page.locator('.product_detail_area.book_inside .auto_overflow_inner .info_text').inner_text()
                     book_content = book_content.replace('<br>', '\n')
                 else:
                     print(f"'{isbn}'의 책 속으로가 없습니다.")
@@ -60,12 +60,13 @@ def scrap_review_and_content(isbn_list):
                 print(f"Error encountered: {e}")
                 continue
 
-            if book_content:
+            if len(book_content) != 0:
                 content_list = book_content.split('\n')
                 for content in content_list:
                     if content:
                         content_dict = {'isbn': isbn, 'content': content}
                         contents.append(content_dict)
+                        print(f"{isbn} 내용: {content}")
 
             try:
                 review_cnt_text_xpath = '//*[@id="contents"]/div[2]/div[1]/div/div[1]/ul/li[3]/a/span/span'
