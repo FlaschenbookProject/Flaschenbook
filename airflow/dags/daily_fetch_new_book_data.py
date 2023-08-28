@@ -40,8 +40,6 @@ def create_fetch_new_book_dag(site):
             environment=environment
         )
 
-        fetch_api_data.log.info(f'Checking for file: {f"s3://{bucket_name}/{object_key}"}')
-
         check_file_exists = S3KeySensor(
             task_id='check_file_exists',
             bucket_key=f's3://{bucket_name}/{object_key}',
