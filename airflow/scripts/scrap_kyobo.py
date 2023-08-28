@@ -159,8 +159,8 @@ def scrap_review_and_content(isbn_list):
     return reviews, contents
 
 
-def upload_to_s3(bucket_name, reviews, type):
-    df = pd.DataFrame(reviews)
+def upload_to_s3(bucket_name, data, type):
+    df = pd.DataFrame(data)
     fs = s3fs.S3FileSystem(anon=False)
     if type == "review":
         bucket_path = f"s3://{bucket_name}/curated/review/{DATE}/{BOOK_TYPE}_book_reviews_{WEBCODE}.parquet"
