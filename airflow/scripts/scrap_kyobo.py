@@ -47,6 +47,8 @@ def scrap_review_and_content(isbn_list):
                 print(f"Error encountered: {e}")
                 continue
 
+            page.wait_for_load_state('domcontentloaded')
+
             book_content = ""
             try:
                 print(f"{isbn} 책 속으로 조회 시작")
