@@ -13,7 +13,13 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers(new AntPathRequestMatcher("/users/register"), new AntPathRequestMatcher("/h2-console/**"));
+        return web -> web.ignoring().requestMatchers(
+                  new AntPathRequestMatcher("/**")
+//                new AntPathRequestMatcher("/users/**"),
+//                new AntPathRequestMatcher("/users/register"),
+//                new AntPathRequestMatcher("/users/login"),
+//                new AntPathRequestMatcher("/h2-console/**")
+        );
     }
 
     @Bean
