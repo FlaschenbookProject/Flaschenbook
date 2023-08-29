@@ -2,7 +2,7 @@ package com.book.flaschenbook.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -10,15 +10,24 @@ import java.sql.Timestamp;
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userId;
     private String username;
-    @Column(unique = true)
+    @Column(unique = true, length = 254)
     private String email;
+    @Column(length = 512)
     private String passwordHash;
+    @Column(length = 2048)
     private String profileImageUrl;
-    private String sex;
-    private Timestamp createdAt;
-    private Timestamp lastLogin;
+    private String gender;
+    private LocalDateTime createdAt;
+    private LocalDateTime lastLogin;
+    @Column(length = 2048)
     private String googleAuthToken;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
+
