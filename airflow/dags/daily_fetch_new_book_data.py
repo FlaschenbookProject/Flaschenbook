@@ -30,7 +30,6 @@ def create_fetch_new_book_dag(site):
         bucket_name = Variable.get("bucket_name")
         environment = os.environ
 
-        os.environ["BOOK_SITE"] = site
         os.environ["NAVER_CLIENT_ID"] = Variable.get("naver_client_id")
         os.environ["NAVER_CLIENT_SECRET"] = Variable.get("naver_client_secret")
         os.environ["KAKAO_REST_API_KEY"] = Variable.get("kakao_rest_api_key")
@@ -42,17 +41,18 @@ def create_fetch_new_book_dag(site):
             provide_context=True,
             dag=dag
         )
-        
+
         date = "{{ ti.xcom_pull(task_ids='get_execution_date', key='TODAY') }}"
         object_key = f'raw/book_info/{site}/{date}/new.json'
 
+        # container 이름이 중복되면 병렬 처리가 불가능
         fetch_api_data = DockerOperator(
             task_id='fetch_api_data',
             image=script_image,
-            container_name='fetch_api_data',
+            container_name=f'fetch_api_data_{site}',
             api_version='auto',
             auto_remove=True,
-            command="python get_api.py",
+            command=["python", "get_api.py", "{{ ds }}", site],
             docker_url="unix://var/run/docker.sock",
             environment=environment
         )
