@@ -1,18 +1,17 @@
 package com.book.flaschenbook.model;
 
 import lombok.Data;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 public class UserModel {
 
     private int userId;
-    private String password;
     private String username;
     private String email;
+    private String password;
     private String profileImageUrl;
-    private String sex;
-    private Timestamp createdAt;
-    private Timestamp lastLogin;
-
+    private String gender;
+    private LocalDateTime createdAt;
+    private LocalDateTime lastLogin;
 }

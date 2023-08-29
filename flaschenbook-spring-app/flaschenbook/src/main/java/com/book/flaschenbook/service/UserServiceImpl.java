@@ -1,4 +1,6 @@
 package com.book.flaschenbook.service;
+
+import com.book.flaschenbook.dto.LoginRequestDTO;
 import com.book.flaschenbook.entity.UserEntity;
 import com.book.flaschenbook.model.UserModel;
 import com.book.flaschenbook.repository.UserRepository;
@@ -6,7 +8,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -33,10 +35,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<UserModel> login(String email, String password) {
-        Optional<UserEntity> userEntity = userRepository.findByEmail(email);
-        if (userEntity.isPresent() && passwordEncoder.matches(password, userEntity.get().getPasswordHash())) {
-            return Optional.of(modelMapper.map(userEntity.get(), UserModel.class));
+    public Optional<UserModel> login(LoginRequestDTO loginRequestDTO) {
+        Optional<UserEntity> userEntityOpt = userRepository.findByEmail(loginRequestDTO.getEmail());
+        if (userEntityOpt.isPresent()) {
+            UserEntity userEntity = userEntityOpt.get();
+            if (passwordEncoder.matches(loginRequestDTO.getPassword(), userEntity.getPasswordHash())) {
+                userEntity.setLastLogin(LocalDateTime.now());
+                userRepository.save(userEntity);
+                return Optional.of(modelMapper.map(userEntity, UserModel.class));
+            }
         }
         return Optional.empty();
     }
@@ -47,7 +54,6 @@ public class UserServiceImpl implements UserService {
         if (userEntity.isPresent()) {
             UserEntity existingUser = userEntity.get();
             existingUser.setUsername(userModel.getUsername());
-            existingUser.setEmail(userModel.getEmail());
             userRepository.save(existingUser);
             return modelMapper.map(existingUser, UserModel.class);
         } else {
