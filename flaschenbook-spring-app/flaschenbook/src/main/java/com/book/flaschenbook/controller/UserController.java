@@ -1,5 +1,6 @@
 package com.book.flaschenbook.controller;
 
+import com.book.flaschenbook.dto.LoginRequestDTO;
 import com.book.flaschenbook.model.UserModel;
 import com.book.flaschenbook.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,8 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserModel> login(@RequestParam String email, @RequestParam String password) {
-        Optional<UserModel> userModel = userService.login(email, password);
+    public ResponseEntity<UserModel> login(@RequestBody LoginRequestDTO loginRequestDTO) {
+        Optional<UserModel> userModel = userService.login(loginRequestDTO);
         return userModel.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(401).body(null));
     }
 
