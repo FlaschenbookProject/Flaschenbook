@@ -13,11 +13,11 @@ glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
-mappings = [("isbn", "string", "ISBN", "string"),
-            ("web_code", "string", "WEB_CODE", "string"),
-            ("wrt_date", "string", "WRT_DATE", "timestamp"),
-            ("content", "string", "CONTENT", "string"),
-            ("rating", "string", "RATING", "decimal(3,1)")]
+mappings = [("isbn", "string", "isbn", "string"),
+            ("web_code", "string", "webCode", "string"),
+            ("wrt_date", "string", "wrtDate", "timestamp"),
+            ("content", "string", "content", "string"),
+            ("rating", "string", "rating", "decimal(3,1)")]
 datasource0 = glueContext.create_dynamic_frame.from_catalog(
     database="flaschenbook-data-catalog-db", table_name="review", transformation_ctx="datasource0")
 applymapping1 = ApplyMapping.apply(

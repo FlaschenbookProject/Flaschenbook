@@ -14,13 +14,13 @@ glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
-mappings = [("ISBN", "string", "ISBN", "string"),
-            ("WEB_CODE", "string", "WEB_CODE", "string"),
-            ("SALE_URL", "string", "SALE_URL", "string"),
-            ("SALE_PRICE", "long", "SALE_PRICE", "decimal"),
-            ("SALE_STATUS", "string", "SALE_STATUS", "string"),
-            ("DESCRIPTION", "string", "DESCRIPTION", "string"),
-            ("RANK", "string", "RANKING", "string")
+mappings = [("ISBN", "string", "isbn", "string"),
+            ("WEB_CODE", "string", "webCode", "string"),
+            ("SALE_URL", "string", "saleUrl", "string"),
+            ("SALE_PRICE", "long", "salePrice", "decimal"),
+            ("SALE_STATUS", "string", "saleStatus", "string"),
+            ("DESCRIPTION", "string", "description", "string"),
+            ("RANK", "string", "ranking", "string")
             ]
 datasource0 = glueContext.create_dynamic_frame.from_catalog(
     database="flaschenbook-data-catalog-db", table_name="book_detail", transformation_ctx="datasource0")

@@ -47,6 +47,8 @@ def scrap_review_and_content(isbn_list):
                 print(f"Error encountered: {e}")
                 continue
 
+            page.wait_for_load_state('domcontentloaded')
+
             book_content = ""
             try:
                 print(f"{isbn} 책 속으로 조회 시작")
@@ -133,7 +135,7 @@ def scrap_review_and_content(isbn_list):
                         wrt_date_xpath).inner_text().replace(".", "-")
 
                     review.update({'isbn': isbn, 'web_code': WEBCODE,
-                                  'content': content, 'rating': rating, 'wrt_date': wrt_date})
+                                  'content': content, 'rating': float(rating), 'wrt_date': wrt_date})
                     # 결과 출력
                     print(f"review {review_cnt}번째")
                     print(f"rating: {rating}")
@@ -159,8 +161,8 @@ def scrap_review_and_content(isbn_list):
     return reviews, contents
 
 
-def upload_to_s3(bucket_name, reviews, type):
-    df = pd.DataFrame(reviews)
+def upload_to_s3(bucket_name, data, type):
+    df = pd.DataFrame(data)
     fs = s3fs.S3FileSystem(anon=False)
     if type == "review":
         bucket_path = f"s3://{bucket_name}/curated/review/{DATE}/{BOOK_TYPE}_book_reviews_{WEBCODE}.parquet"

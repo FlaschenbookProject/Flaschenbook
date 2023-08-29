@@ -13,7 +13,7 @@ WEBCODE = "AL"
 BOOK_TYPE = "best"
 
 
-def scrap_review(isbn_list):
+def scrap_review(isbn_list, bucket_name):
     reviews = []
 
     with sync_playwright() as p:
@@ -21,7 +21,8 @@ def scrap_review(isbn_list):
         context = browser.new_context(ignore_https_errors=True)
         page = context.new_page()
 
-        for isbn in isbn_list:
+        num = 1
+        for inx, isbn in enumerate(isbn_list):
             try:
                 reviews_one_book = []
 
@@ -77,16 +78,27 @@ def scrap_review(isbn_list):
 
                 while not page.locator(total_xpath).first.is_visible():
                     page.evaluate('window.scrollBy(0, 100);')  # 100 픽셀씩 스크롤
+                    page.wait_for_load_state('domcontentloaded')
                 page.locator(total_xpath).click()
 
                 review_more_button = page.locator('//*[@id="divReviewPageMore"]/div[1]/a')
+                prev_scroll_position = -1  # 이전 스크롤 위치
 
-                while review_more_button.is_visible():
+                while True:
                     try:
-                        # "더 보기" 버튼이 있으면 클릭
-                        review_more_button.click()
+                        # 현재 스크롤 위치 가져오기
+                        current_scroll_position = page.evaluate('window.scrollY')
+
+                        if current_scroll_position == prev_scroll_position:
+                            print("더 이상 스크롤이 내려가지 않음")
+                            break
                         page.evaluate('window.scrollBy(0, 100);')  # 100 픽셀씩 스크롤
-                        page.wait_for_selector(review_more_button)
+                        page.wait_for_load_state('domcontentloaded')
+                        if review_more_button.is_visible():
+                            review_more_button.click()
+
+                        # 스크롤 위치가 더 이상 변하지 않으면 종료
+                        prev_scroll_position = current_scroll_position  # 이전 스크롤 위치 업데이트
                     except Exception as e:
                         if "TimeoutError" in str(e):
                             print(f"Timeout Error: {e}")
@@ -97,6 +109,10 @@ def scrap_review(isbn_list):
 
                 review_list_xpath = '//*[@id="CommentReviewList"]/div[1]/ul/div[contains(@class, "hundred_list")]'
                 page.wait_for_selector(review_list_xpath)
+
+                if page.locator(review_list_xpath).count() <= 0:
+                    print(f"{isbn} 책의 리뷰가 없습니다")
+                    continue
 
                 review_cnt = page.locator(review_list_xpath).count()
                 print(review_cnt)
@@ -118,7 +134,7 @@ def scrap_review(isbn_list):
                             else:
                                 rating += 2
 
-                        review_dict = {'isbn': isbn, 'web_code': WEBCODE, 'content': review_text, 'rating': rating, 'wrt_date': date}
+                        review_dict = {'isbn': isbn, 'web_code': WEBCODE, 'content': review_text, 'rating': float(rating), 'wrt_date': date}
                         reviews_one_book.append(review_dict)
 
                         print("리뷰:", review_text)
@@ -136,19 +152,25 @@ def scrap_review(isbn_list):
                 if len(reviews_one_book) == 0:
                     continue
                 reviews.extend(reviews_one_book)
+
             except Exception as e:
                 print(f"스크래핑 중 오류 발생: {str(e)}")
                 continue
+
+            if inx % 100 == 0:
+                upload_to_s3(bucket_name, reviews, num)
+                num += 1
+                reviews = []
+
         page.close()
         context.close()
         browser.close()
-    return reviews
 
 
-def upload_to_s3(bucket_name, reviews):
+def upload_to_s3(bucket_name, reviews, num):
     df = pd.DataFrame(reviews)
     fs = s3fs.S3FileSystem(anon=False)
-    bucket_path = f"s3://{bucket_name}/curated/review/{DATE}/{BOOK_TYPE}_book_reviews_{WEBCODE}.parquet"
+    bucket_path = f"s3://{bucket_name}/curated/review/{DATE}/{BOOK_TYPE}_book_reviews_{WEBCODE}_{num}.parquet"
     print(f"{bucket_path} 파일 업로드 시작")
     with fs.open(bucket_path, 'wb') as f:
         df.to_parquet(f)
@@ -160,8 +182,7 @@ def main():
     bucket_name = os.environ.get("BUCKET_NAME")
     isbn_object_key = f"raw/isbn/{DATE}/{BOOK_TYPE}.csv"
     isbn_list = get_isbn_list(bucket_name, isbn_object_key)
-    reviews = scrap_review(isbn_list)
-    upload_to_s3(bucket_name, reviews)
+    scrap_review(isbn_list, bucket_name)
 
 
 if __name__ == "__main__":
