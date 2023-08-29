@@ -1,5 +1,6 @@
 package com.book.flaschenbook.service;
 
+import com.book.flaschenbook.dto.LoginRequestDTO;
 import com.book.flaschenbook.model.UserModel;
 import java.util.Optional;
 
@@ -9,7 +10,7 @@ public interface UserService {
     UserModel register(UserModel userModel);
 
     // 사용자 로그인
-    Optional<UserModel> login(String email, String password);
+    Optional<UserModel> login(LoginRequestDTO loginRequestDTO);
 
     // 사용자 정보 업데이트
     UserModel updateProfile(UserModel userModel);
