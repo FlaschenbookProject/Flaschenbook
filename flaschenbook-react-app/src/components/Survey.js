@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Survey() {
   const [sentencePairs, setSentencePairs] = useState([
@@ -8,7 +9,7 @@ function Survey() {
     ["great", "bored"],
     ["literature", "SF"],
   ]);
-
+  const navigate = useNavigate();
   const [selectedSentences, setSelectedSentences] = useState([]);
 
   const handleSelection = (index) => {
@@ -31,9 +32,7 @@ function Survey() {
       ) : (
         <div>
           <h2>Selection completed.</h2>
-          <button onClick={() => console.log(selectedSentences)}>
-            Get Book Recommendations
-          </button>
+          <button onClick={() => navigate("/")}>let's get started~!</button>
         </div>
       )}
     </div>
