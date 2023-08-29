@@ -25,11 +25,11 @@ public class BookInfoModel {
     private String naverSaleUrl;
     private String kakaoSaleUrl;
 
-    private Integer aladin_salePrice;
-    private Integer naver_salePrice;
-    private Integer kakao_salePrice;
+    private Integer aladinSalePrice;
+    private Integer naverSalePrice;
+    private Integer kakaoSalePrice;
 
-    private String aladin_saleStatus;
-    private String naver_saleStatus;
-    private String kakao_saleStatus;
+    private String aladinSaleStatus;
+    private String naverSaleStatus;
+    private String kakaoSaleStatus;
 }
