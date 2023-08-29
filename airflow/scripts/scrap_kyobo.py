@@ -135,7 +135,7 @@ def scrap_review_and_content(isbn_list):
                         wrt_date_xpath).inner_text().replace(".", "-")
 
                     review.update({'isbn': isbn, 'web_code': WEBCODE,
-                                  'content': content, 'rating': rating, 'wrt_date': wrt_date})
+                                  'content': content, 'rating': float(rating), 'wrt_date': wrt_date})
                     # 결과 출력
                     print(f"review {review_cnt}번째")
                     print(f"rating: {rating}")
