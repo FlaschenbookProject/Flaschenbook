@@ -1,0 +1,79 @@
+@font-face {
+    font-family: "Pado";
+    font-style: normal;
+    font-weight: 100;
+    src: url("../../public/a파도소리.ttf") format("tff");
+}
+
+@font-face {
+    font-family: "Da";
+    font-style: normal;
+    font-weight: 100;
+    src: url("../../public/오뮤_다예쁨체.ttf") format("tff");
+}
+
+
+@font-face {
+    font-family: "SCDream1";
+    font-style: normal;
+    font-weight: 100;
+    src: url("../../public/SCDream1.woff") format("woff");
+}
+
+
+@font-face {
+    font-family: "SCDream2";
+    font-style: normal;
+    font-weight: 100;
+    src: url("../../public/SCDream2.woff") format("woff");
+}
+
+
+@font-face {
+    font-family: "SCDream3";
+    font-style: normal;
+    font-weight: 100;
+    src: url("../../public/SCDream3.woff") format("woff");
+}
+
+@font-face {
+    font-family: "SCDream4";
+    font-style: normal;
+    font-weight: 100;
+    src: url("../../public/SCDream4.woff") format("woff");
+}
+
+@font-face {
+    font-family: "SCDream5";
+    font-style: normal;
+    font-weight: 100;
+    src: url("../../public/SCDream5.woff") format("woff");
+}
+
+@font-face {
+    font-family: "SCDream6";
+    font-style: normal;
+    font-weight: 100;
+    src: url("../../public/SCDream6.woff") format("woff");
+}
+
+@font-face {
+    font-family: "SCDream7";
+    font-style: normal;
+    font-weight: 100;
+    src: url("../../public/SCDream7.woff") format("woff");
+}
+
+@font-face {
+    font-family: "SCDream8";
+    font-style: normal;
+    font-weight: 100;
+    src: url("../../public/SCDream8.woff") format("woff");
+}
+
+@font-face {
+    font-family: "SCDream9";
+    font-style: normal;
+    font-weight: 100;
+    src: url("../../public/SCDream9.woff") format("woff");
+}

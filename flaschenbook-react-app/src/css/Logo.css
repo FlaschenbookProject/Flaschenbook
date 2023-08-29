@@ -1,0 +1,38 @@
+/* 로고 컨테이너 스타일 */
+.logo-container {
+    position: relative;
+    width: 100%;
+  }
+  
+/* 로고 이미지 스타일 */
+.logo-image {
+position: absolute;
+top: 38%;
+left: 50%;
+transform: translate(-50%, -50%);
+max-width: 30%;
+height: auto;
+z-index: 1;
+}
+
+.login-controls {
+    position: absolute;
+    display: flex;
+    gap: 3vw; /* 컨트롤 간격을 뷰포트 단위로 설정 */
+    top: 4vh; /* 상단 여백을 뷰포트 단위로 설정 */
+    right: 3vw; /* 우측 여백을 뷰포트 단위로 설정 */
+    font-family: 'SCDream3', sans-serif; /* SCDream2.otf 폰트 적용 */
+    font-size: 2vmin;
+  }
+
+.link-style {
+    text-decoration: none; /* 밑줄 제거 */
+    color: inherit; /* 기존 텍스트 색상으로 설정 */
+  }
+
+  footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+  }
