@@ -12,6 +12,8 @@ import Login from "./components/Login";
 import Survey from "./components/Survey";
 import MyPage from "./components/MyPage";
 import "font-awesome/css/font-awesome.min.css";
+import MainLogo from "./components/MainLogo";
+import Footer from "./components/Footer";
 
 function App() {
   const [isLogged, setIsLogged] = useState(false);
@@ -51,19 +53,23 @@ function App() {
   return (
     <AppContext.Provider value={{ setIsLogged, isLogged }}>
       <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/register" element={<Register />} />
-          <Route
-            path="/login"
-            element={isLogged ? <Navigate to="/" /> : <Login />}
-          />
-          <Route path="/survey" element={<Survey />} />
-          <Route
-            path="/my_page"
-            element={isLogged ? <MyPage /> : <Navigate to="/login" />}
-          />
-        </Routes>
+        <div>
+          <MainLogo />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/login"
+              element={isLogged ? <Navigate to="/" /> : <Login />}
+            />
+            <Route path="/survey" element={<Survey />} />
+            <Route
+              path="/my_page"
+              element={isLogged ? <MyPage /> : <Navigate to="/login" />}
+            />
+          </Routes>
+          <Footer />
+        </div>
       </Router>
     </AppContext.Provider>
   );
