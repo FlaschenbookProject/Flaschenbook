@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import AppContext from "../context";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Login(props) {
+  const { setIsLogged } = useContext(AppContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [warning, setWarning] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = (event) => {
@@ -17,13 +20,30 @@ function Login(props) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(user),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          return response.text().then((text) => {
+            throw new Error(text);
+          });
+        }
+      })
       .then((data) => {
         console.log("Success:", data);
+        const sessionInfo = {
+          userId: data.userId,
+          sessionId: data.sessionId,
+        };
+        localStorage.setItem("sessionInfo", JSON.stringify(sessionInfo));
+
+        setIsLogged(true); // 로그인 성공하면 isLogged 상태를 업데이트합니다.
         navigate("/");
       })
       .catch((error) => {
         console.error("Error:", error);
+        const errorMessage = JSON.parse(error.message);
+        setWarning(errorMessage.message);
       });
   };
 
@@ -61,6 +81,11 @@ function Login(props) {
                     required
                   />
                 </div>
+                {warning && (
+                  <div className="alert alert-warning" role="alert">
+                    {warning}
+                  </div>
+                )}
                 <button type="submit" className="btn btn-primary w-100">
                   Login
                 </button>
