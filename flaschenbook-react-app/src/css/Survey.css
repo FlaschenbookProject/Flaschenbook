@@ -1,0 +1,11 @@
+.survey-question-text {
+  font-family: "Pado", sans-serif;
+  color: #5a2f2b;
+}
+
+.survey-content-text {
+  font-family: "Da", sans-serif;
+  color: white;
+  font-size: larger;
+  font-weight: 500;
+}
