@@ -8,6 +8,7 @@ function Survey() {
   const [contentPairs, setContentPairs] = useState([""]);
   const navigate = useNavigate();
   const [selectedContents, setSelectedContents] = useState([]);
+  const username = localStorage.getItem("username");
 
   useEffect(() => {
     fetch("/api/survey/content-pairs")
@@ -51,7 +52,7 @@ function Survey() {
         <div>
           <div className="text-center mb-4">
             <h3 className="survey-question-text">
-              "사용자" 님에게 바다에서 쪽지가 도착했습니다.
+              "{username}" 님에게 바다에서 쪽지가 도착했습니다.
             </h3>
             <h2 className="survey-question-text">
               더 끌리는 쪽지를 골라 주세요.
