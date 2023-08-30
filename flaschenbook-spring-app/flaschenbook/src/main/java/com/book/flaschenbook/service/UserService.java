@@ -1,23 +1,18 @@
 package com.book.flaschenbook.service;
 
 import com.book.flaschenbook.dto.LoginRequestDTO;
+import com.book.flaschenbook.dto.LogoutRequestDTO;
+import com.book.flaschenbook.entity.SessionDataEntity;
 import com.book.flaschenbook.model.UserModel;
 import java.util.Optional;
 
 public interface UserService {
 
-    // 사용자 등록
     UserModel register(UserModel userModel);
-
-    // 사용자 로그인
     Optional<UserModel> login(LoginRequestDTO loginRequestDTO);
-
-    // 사용자 정보 업데이트
+    void logout(LogoutRequestDTO logoutRequestDTO);
     UserModel updateProfile(UserModel userModel);
-
-    // 사용자의 프로필 사진 URL 업데이트
     void updateProfileImageUrl(int userId, String profileImageUrl);
-
-    // 사용자 정보 조회
     Optional<UserModel> getUserById(int userId);
+    void saveSessionData(SessionDataEntity sessionData);
 }
