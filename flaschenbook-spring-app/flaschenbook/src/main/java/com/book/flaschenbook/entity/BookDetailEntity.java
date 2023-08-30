@@ -17,14 +17,14 @@ public class BookDetailEntity {
     @JoinColumn(name = "isbn")
     private BookInfoEntity bookInfo;
 
-    private Integer saleUrl;
+    private String saleUrl;
 
     private Integer salePrice;
 
     private String saleStatus;
 
     @Column(columnDefinition = "TEXT")
-    private Integer description;
+    private String description;
 
     private String ranking;
 }

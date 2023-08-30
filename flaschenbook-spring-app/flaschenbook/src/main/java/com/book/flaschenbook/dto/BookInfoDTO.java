@@ -19,9 +19,9 @@ public class BookInfoDTO {
     private String imageUrl;
     private String categoryName;
     private String webCode;
-    private Integer saleUrl;
+    private String saleUrl;
     private Integer salePrice;
     private String saleStatus;
-    private Integer description;
+    private String description;
     private String ranking;
 }
