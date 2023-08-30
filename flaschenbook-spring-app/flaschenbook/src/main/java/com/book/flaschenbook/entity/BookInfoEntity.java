@@ -25,7 +25,6 @@ public class BookInfoEntity implements Serializable {
     @OneToMany(mappedBy = "bookInfo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<BookDetailEntity> bookDetails;
 
-
     @Column(length = 700)
     private String title;
     private Integer categoryId;

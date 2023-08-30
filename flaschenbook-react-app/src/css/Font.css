@@ -2,14 +2,14 @@
     font-family: "Pado";
     font-style: normal;
     font-weight: 100;
-    src: url("../../public/a파도소리.ttf") format("tff");
+    src: url("../../public/a파도소리.woff") format("woff");
 }
 
 @font-face {
     font-family: "Da";
     font-style: normal;
     font-weight: 100;
-    src: url("../../public/오뮤_다예쁨체.ttf") format("tff");
+    src: url("../../public/오뮤_다예쁨체.woff") format("woff");
 }
 
 
