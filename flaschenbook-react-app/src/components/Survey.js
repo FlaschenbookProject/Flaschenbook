@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "../css/Font.css"; // Font.css 파일을 import
+import "../css/Survey.css";
 
 function Survey() {
   const [contentPairs, setContentPairs] = useState([""]);
@@ -37,28 +40,112 @@ function Survey() {
             throw new Error("Network response was not ok");
           }
           console.log("Success");
-          navigate("/");
         })
         .catch((error) => console.error("Error:", error));
     }
   };
 
   return (
-    <div>
+    <div className="container d-flex justify-content-center align-items-center">
       {contentPairs.length ? (
         <div>
-          <h2>Select a content:</h2>
-          <button onClick={() => handleSelection(0)}>
-            {contentPairs[0].content1 ? contentPairs[0].content1.content : ""}
-          </button>
-          <button onClick={() => handleSelection(1)}>
-            {contentPairs[0].content2 ? contentPairs[0].content2.content : ""}
-          </button>
+          <div className="text-center mb-4">
+            <h3 className="survey-question-text">
+              "사용자" 님에게 바다에서 쪽지가 도착했습니다.
+            </h3>
+            <h2 className="survey-question-text">
+              더 끌리는 쪽지를 골라 주세요.
+            </h2>
+          </div>
+          <div className="row justify-content-center">
+            <div className="col-auto">
+              <div
+                className="card"
+                style={{
+                  width: "18rem",
+                  height: "20rem",
+                  border: "none",
+                  borderRadius: "10px",
+                }}
+              >
+                <div
+                  className="card-body"
+                  style={{ height: "18rem", padding: 0 }}
+                >
+                  <div
+                    className="h-100 overflow-auto p-3"
+                    style={{
+                      backgroundColor: "#0099ff",
+                      color: "white",
+                      borderRadius: "10px",
+                    }}
+                    onClick={() => handleSelection(0)}
+                  >
+                    <p className="survey-content-text">
+                      {contentPairs[0].content1
+                        ? contentPairs[0].content1.content
+                        : ""}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              className="col-auto d-flex align-items-center justify-content-center mx-4"
+              style={{ fontSize: "3rem", height: "20rem" }}
+            >
+              🤔
+            </div>
+            <div className="col-auto">
+              <div
+                className="card"
+                style={{
+                  width: "18rem",
+                  height: "20rem",
+                  border: "none",
+                  borderRadius: "10px",
+                }}
+              >
+                <div
+                  className="card-body"
+                  style={{ height: "18rem", padding: 0 }}
+                >
+                  <div
+                    className="h-100 overflow-auto p-3"
+                    style={{
+                      backgroundColor: "#0099ff",
+                      color: "white",
+                      borderRadius: "10px",
+                    }}
+                    onClick={() => handleSelection(1)}
+                  >
+                    <p className="survey-content-text">
+                      {contentPairs[0].content2
+                        ? contentPairs[0].content2.content
+                        : ""}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
-        <div>
-          <h2>Selection completed.</h2>
-          <button onClick={() => navigate("/")}>let's get started~!</button>
+        <div
+          className="d-flex justify-content-center align-items-center"
+          style={{ minHeight: "50vh" }}
+        >
+          <div
+            className="d-flex justify-content-center align-items-center"
+            style={{ minHeight: "50vh" }}
+          >
+            <div>
+              <h2 className="text-center mb-4 survey-question-text">🎉</h2>
+              <button className="btn btn-primary" onClick={() => navigate("/")}>
+                시작하기
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
