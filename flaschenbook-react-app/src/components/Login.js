@@ -36,6 +36,7 @@ function Login(props) {
           sessionId: data.sessionId,
         };
         localStorage.setItem("sessionInfo", JSON.stringify(sessionInfo));
+        localStorage.setItem("username", data.username);
 
         setIsLogged(true); // 로그인 성공하면 isLogged 상태를 업데이트합니다.
         navigate("/");

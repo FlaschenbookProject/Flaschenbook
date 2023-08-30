@@ -20,7 +20,7 @@ function Register(props) {
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
-      setEmailError("Invalid email address");
+      setEmailError("유효하지 않은 이메일입니다.");
     } else {
       setEmailError("");
     }
@@ -61,6 +61,7 @@ function Register(props) {
         };
         console.log("Login Success:", data);
         localStorage.setItem("sessionInfo", JSON.stringify(sessionInfo));
+        localStorage.setItem("username", data.username);
 
         setIsLogged(true); // 로그인 성공하면 isLogged 상태를 업데이트합니다.
         navigate("/survey");
