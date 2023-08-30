@@ -4,7 +4,9 @@ import com.book.flaschenbook.dto.LoginRequestDTO;
 import com.book.flaschenbook.dto.LogoutRequestDTO;
 import com.book.flaschenbook.entity.SessionDataEntity;
 import com.book.flaschenbook.entity.SessionDataId;
+import com.book.flaschenbook.entity.UserEntity;
 import com.book.flaschenbook.model.UserModel;
+import com.book.flaschenbook.repository.UserRepository;
 import com.book.flaschenbook.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.modelmapper.spi.ErrorMessage;
@@ -14,28 +16,36 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
+    private final UserRepository userRepository;
     private final UserService userService;
 
-    @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserRepository userRepository, UserService userService) {
+        this.userRepository = userRepository;
         this.userService = userService;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserModel> register(@RequestBody UserModel userModel) {
+    public ResponseEntity<?> register(@RequestBody UserModel userModel) {
+        Optional<UserEntity> existingUser = userRepository.findByEmail(userModel.getEmail());
+        if (existingUser.isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Email is already in use"));
+        }
+
         try {
             UserModel registeredUser = userService.register(userModel);
-            return ResponseEntity.ok(registeredUser);
+            return ResponseEntity.ok(Map.of("message", "User registered successfully"));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "An error occurred while registering the user"));
         }
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequestDTO, HttpSession session) {
