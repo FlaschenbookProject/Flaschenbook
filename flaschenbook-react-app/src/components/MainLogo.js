@@ -3,10 +3,12 @@ import "../css/Font.css"; // Font.css 파일을 import
 import AppContext from "../context";
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // MainLogo.js
 function MainLogo() {
   const { setIsLogged, isLogged } = useContext(AppContext);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     const sessionInfo = JSON.parse(localStorage.getItem("sessionInfo"));
@@ -20,6 +22,7 @@ function MainLogo() {
         console.log("Success:", data);
         localStorage.removeItem("sessionInfo");
         setIsLogged(false);
+        navigate("/");
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -39,7 +42,9 @@ function MainLogo() {
       </svg>
       {/* 로고 이미지 */}
       {/* 로고 이미지 */}
-      <img src="/logo.png" alt="로고" className="logo-image" />
+      <Link to="/">
+        <img src="/logo.png" alt="로고" className="logo-image" />
+      </Link>
       <div
         className={`login-controls ${isLogged ? "logged-in" : "logged-out"}`}
       >
