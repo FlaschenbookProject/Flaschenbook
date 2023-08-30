@@ -1,12 +1,19 @@
 package com.book.flaschenbook.controller;
 
 import com.book.flaschenbook.dto.LoginRequestDTO;
+import com.book.flaschenbook.dto.LogoutRequestDTO;
+import com.book.flaschenbook.entity.SessionDataEntity;
+import com.book.flaschenbook.entity.SessionDataId;
 import com.book.flaschenbook.model.UserModel;
 import com.book.flaschenbook.service.UserService;
+import jakarta.servlet.http.HttpSession;
+import org.modelmapper.spi.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
@@ -31,9 +38,33 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserModel> login(@RequestBody LoginRequestDTO loginRequestDTO) {
-        Optional<UserModel> userModel = userService.login(loginRequestDTO);
-        return userModel.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(401).body(null));
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequestDTO, HttpSession session) {
+        Optional<UserModel> userModelOpt = userService.login(loginRequestDTO);
+
+        if (userModelOpt.orElse(null) == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorMessage("등록된 사용자가 없습니다."));
+        }
+
+        UserModel userModel = userModelOpt.get();
+
+        if (userModel.getUserId() == 0) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorMessage("비밀번호가 틀렸습니다."));
+        }
+
+        SessionDataEntity sessionData = new SessionDataEntity();
+        sessionData.setSessionDataId(new SessionDataId(userModel.getUserId(), session.getId()));
+        sessionData.setSessionStart(LocalDateTime.now());
+
+        userService.saveSessionData(sessionData);
+
+        return ResponseEntity.ok(userModel);
+    }
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody LogoutRequestDTO logoutRequestDTO) {
+        userService.logout(logoutRequestDTO);
+        return ResponseEntity.ok().body("Logout successful");
     }
 
     @PutMapping("/update")

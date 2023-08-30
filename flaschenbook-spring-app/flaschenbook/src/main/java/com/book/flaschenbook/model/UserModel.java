@@ -14,4 +14,5 @@ public class UserModel {
     private String gender;
     private LocalDateTime createdAt;
     private LocalDateTime lastLogin;
+    private String sessionId;
 }
