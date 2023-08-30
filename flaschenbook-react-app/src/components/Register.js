@@ -72,129 +72,116 @@ function Register(props) {
   };
 
   return (
-    <div className="main-page">
-      <header>
-        <div className="logo">
-          <MainLogo />
-          {/* 로고 이미지 */}
+    <div className="container d-flex justify-content-center">
+      <form onSubmit={handleSubmit}>
+        <h3>Sign In</h3>
+        <div className="mb-3">
+          <label htmlFor="username" className="form-label">
+            Username
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            autocomplete="username"
+          />
         </div>
-      </header>
-
-      <div className="container d-flex justify-content-center">
-        <form onSubmit={handleSubmit}>
-          <h3>Sign In</h3>
-          <div className="mb-3">
-            <label htmlFor="username" className="form-label">
-              Username
-            </label>
+        <div className="mb-3">
+          <label htmlFor="email" className="form-label">
+            Email
+          </label>
+          <input
+            type="email"
+            className="form-control"
+            id="email"
+            value={email}
+            onChange={handleEmailChange}
+            autocomplete="email"
+          />
+          {emailError && <div className="text-danger">{emailError}</div>}
+        </div>
+        <div className="mb-3">
+          <label htmlFor="password" className="form-label">
+            Password
+          </label>
+          <div className="input-group mb-3">
             <input
-              type="text"
+              type={showPassword ? "text" : "password"}
               className="form-control"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autocomplete="username"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
+            <div className="input-group-append">
+              <button
+                className="btn btn-outline-secondary border-left-0"
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <i className="fa fa-eye-slash"></i>
+                ) : (
+                  <i className="fa fa-eye"></i>
+                )}
+              </button>
+            </div>
           </div>
-          <div className="mb-3">
-            <label htmlFor="email" className="form-label">
-              Email
+        </div>
+        <div className="mb-3">
+          <label htmlFor="birthdate" className="form-label">
+            Birthdate
+          </label>
+          <input
+            type="date"
+            className="form-control"
+            id="birthdate"
+            value={birthdate}
+            onChange={(e) => setBirthdate(e.target.value)}
+          />
+        </div>
+        <div className="mb-3">
+          <div>
+            <label htmlFor="gender" className="form-label">
+              Gender
             </label>
+          </div>
+          <div className="form-check form-check-inline">
             <input
-              type="email"
-              className="form-control"
-              id="email"
-              value={email}
-              onChange={handleEmailChange}
-              autocomplete="email"
+              className="form-check-input"
+              type="radio"
+              name="gender"
+              id="male"
+              value="M"
+              checked={gender === "M"}
+              onChange={(e) => setGender(e.target.value)}
             />
-            {emailError && <div className="text-danger">{emailError}</div>}
-          </div>
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label">
-              Password
+            <label className="form-check-label" htmlFor="male">
+              Male
             </label>
-            <div className="input-group mb-3">
-              <input
-                type={showPassword ? "text" : "password"}
-                className="form-control"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <div className="input-group-append">
-                <button
-                  className="btn btn-outline-secondary border-left-0"
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <i className="fa fa-eye-slash"></i>
-                  ) : (
-                    <i className="fa fa-eye"></i>
-                  )}
-                </button>
-              </div>
-            </div>
           </div>
-          <div className="mb-3">
-            <label htmlFor="birthdate" className="form-label">
-              Birthdate
-            </label>
+          <div className="form-check form-check-inline">
             <input
-              type="date"
-              className="form-control"
-              id="birthdate"
-              value={birthdate}
-              onChange={(e) => setBirthdate(e.target.value)}
+              className="form-check-input"
+              type="radio"
+              name="gender"
+              id="female"
+              value="F"
+              checked={gender === "F"}
+              onChange={(e) => setGender(e.target.value)}
             />
+            <label className="form-check-label" htmlFor="female">
+              Female
+            </label>
           </div>
-          <div className="mb-3">
-            <div>
-              <label htmlFor="gender" className="form-label">
-                Gender
-              </label>
-            </div>
-            <div className="form-check form-check-inline">
-              <input
-                className="form-check-input"
-                type="radio"
-                name="gender"
-                id="male"
-                value="M"
-                checked={gender === "M"}
-                onChange={(e) => setGender(e.target.value)}
-              />
-              <label className="form-check-label" htmlFor="male">
-                Male
-              </label>
-            </div>
-            <div className="form-check form-check-inline">
-              <input
-                className="form-check-input"
-                type="radio"
-                name="gender"
-                id="female"
-                value="F"
-                checked={gender === "F"}
-                onChange={(e) => setGender(e.target.value)}
-              />
-              <label className="form-check-label" htmlFor="female">
-                Female
-              </label>
-            </div>
-          </div>
-          <div className="d-grid">
-            <button type="submit" className="btn btn-primary">
-              Submit
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <div className="footer">
-        <Footer />
-      </div>
+        </div>
+        <div className="d-grid">
+          <button type="submit" className="btn btn-primary">
+            Submit
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
