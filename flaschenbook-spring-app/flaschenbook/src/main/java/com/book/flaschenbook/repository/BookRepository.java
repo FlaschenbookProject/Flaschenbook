@@ -24,7 +24,7 @@ public interface BookRepository extends JpaRepository<BookInfoEntity, String> {
           JOIN BookDetail b
             ON a.isbn = b.isbn
          WHERE DATE_FORMAT(a.pubDate, '%Y%m') = date_format(now(), '%Y%m')
-           AND a.categoryId IN (SELECT code                          
+           AND a.categoryId IN (SELECT code
                                   FROM CodeDetail
                                  WHERE commonCode = 1)
         ORDER BY a.pubDate DESC
