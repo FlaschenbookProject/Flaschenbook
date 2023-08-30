@@ -11,6 +11,7 @@ import Register from "./components/Register";
 import Login from "./components/Login";
 import Survey from "./components/Survey";
 import MyPage from "./components/MyPage";
+import "font-awesome/css/font-awesome.min.css";
 
 function App() {
   const [isLogged, setIsLogged] = useState(false);
