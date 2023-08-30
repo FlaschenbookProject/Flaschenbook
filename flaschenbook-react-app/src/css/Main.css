@@ -1,0 +1,21 @@
+
+.book-section {
+    position: relative;
+    background-color: #fff; 
+    color: #B9E0FD; 
+    padding: 10px 0;
+    left: 2%;
+    margin-left: 20px;
+    text-align: left;
+  }
+  
+  .book-section-title {
+    font-size: 5vmin;
+    font-family: 'Pado', sans-serif;
+    color: #5AB2FF;
+    margin-bottom: 20px; 
+  }
+  
+  .book-slider {
+    margin-top: 30px; 
+  }
