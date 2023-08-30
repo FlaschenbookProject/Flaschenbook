@@ -13,8 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -24,8 +23,7 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, SessionDataRepository sessionDataRepository,ModelMapper modelMapper, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, SessionDataRepository sessionDataRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.sessionDataRepository = sessionDataRepository;
         this.modelMapper = modelMapper;

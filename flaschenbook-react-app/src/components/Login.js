@@ -1,8 +1,6 @@
 import React, { useContext, useState } from "react";
 import AppContext from "../context";
 import { useNavigate } from "react-router-dom";
-import MainLogo from "./MainLogo";
-import Footer from "./Footer";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Login(props) {

@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import MainLogo from "./MainLogo";
-import Footer from "./Footer";
+import AppContext from "../context";
 
 function Register(props) {
   const [username, setUsername] = useState("");
@@ -11,6 +10,7 @@ function Register(props) {
   const [emailError, setEmailError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [birthdate, setBirthdate] = useState("");
+  const { setIsLogged } = useContext(AppContext);
 
   const navigate = useNavigate();
 
@@ -36,7 +36,12 @@ function Register(props) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(user),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw response;
+        }
+        return response.json();
+      })
       .then((data) => {
         console.log("Success:", data);
 
@@ -49,11 +54,26 @@ function Register(props) {
       })
       .then((response) => response.json())
       .then((data) => {
+        console.log("Success:", data);
+        const sessionInfo = {
+          userId: data.userId,
+          sessionId: data.sessionId,
+        };
         console.log("Login Success:", data);
+        localStorage.setItem("sessionInfo", JSON.stringify(sessionInfo));
+
+        setIsLogged(true); // 로그인 성공하면 isLogged 상태를 업데이트합니다.
         navigate("/survey");
       })
       .catch((error) => {
-        console.error("Error:", error);
+        if (error instanceof Response) {
+          error.json().then((errorMessage) => {
+            setEmailError(errorMessage.message);
+            console.error(errorMessage);
+          });
+        } else {
+          console.error("Error:", error);
+        }
       });
   };
 
@@ -98,9 +118,11 @@ function Register(props) {
             id="email"
             value={email}
             onChange={handleEmailChange}
-            autocomplete="email"
+            autoComplete="email"
           />
-          {emailError && <div className="text-danger">{emailError}</div>}
+          {emailError && (
+            <div className="alert alert-warning mt-2">{emailError}</div>
+          )}
         </div>
         <div className="mb-3">
           <label htmlFor="password" className="form-label">
