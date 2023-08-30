@@ -1,6 +1,8 @@
 import React, { useContext, useState } from "react";
 import AppContext from "../context";
 import { useNavigate } from "react-router-dom";
+import MainLogo from "./MainLogo";
+import Footer from "./Footer";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Login(props) {
@@ -49,7 +51,7 @@ function Login(props) {
 
   return (
     <div className="container">
-      <div className="row justify-content-center align-items-center vh-100">
+      <div className="row justify-content-center">
         <div className="col-md-4">
           <div className="card">
             <div className="card-body">

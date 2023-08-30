@@ -3,6 +3,7 @@ package com.book.flaschenbook.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @Entity
@@ -20,6 +21,7 @@ public class UserEntity {
     @Column(length = 2048)
     private String profileImageUrl;
     private String gender;
+    private Date birthdate;
     private LocalDateTime createdAt;
     private LocalDateTime lastLogin;
     @Column(length = 2048)
