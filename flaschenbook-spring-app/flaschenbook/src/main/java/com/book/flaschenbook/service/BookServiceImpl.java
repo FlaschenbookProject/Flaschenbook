@@ -6,17 +6,25 @@ import com.book.flaschenbook.model.BookModel;
 import com.book.flaschenbook.repository.BookCategoryRepository;
 import com.book.flaschenbook.repository.BookRepository;
 import com.book.flaschenbook.repository.CodeDetailRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 public class BookServiceImpl implements BookService {
-
     private final BookRepository bookRepository;
     private ModelMapper modelMapper;
     private final BookCategoryRepository bookCategoryRepository;
@@ -78,21 +86,6 @@ public class BookServiceImpl implements BookService {
 
         return bookDetailDTOs;
     }
-    @Override
-    @Transactional(readOnly = true)
-    public List<BookDetailDTO> getNewReleases() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        Date firstDayOfMonth = calendar.getTime();
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-        Date lastDayOfMonth = calendar.getTime();
-
-        List<BookInfoEntity> recentBooks = bookRepository.findTop20ByPubDateBetweenOrderByPubDateDesc(
-                firstDayOfMonth, lastDayOfMonth
-        );
-
-        return  mapBookDetailEntityToDTO(recentBooks);
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -105,7 +98,6 @@ public class BookServiceImpl implements BookService {
 
         List<Integer> categoryIdList = codeDetailRepository.findByCommonCode(1).stream()
                 .map(CodeDetailEntity::getCode).toList();
-        System.out.println(categoryIdList);
         List<BookInfoEntity> recentBooks = bookRepository.findTop20ByPubDateBetweenOrderByPubDateDesc(
                 firstDayOfMonth, lastDayOfMonth
         );
@@ -117,9 +109,94 @@ public class BookServiceImpl implements BookService {
 
         for (BookInfoEntity bookInfo : filteredBooks) {
             BookModel book = modelMapper.map(bookInfo, BookModel.class);
+            for (BookDetailEntity bookDetail : bookInfo.getBookDetails()) {
+                if ("AL".equals(bookDetail.getId().getWebCode())) {
+                    book.setDescription(bookDetail.getDescription());
+                    break;
+                }
+            }
             books.add(book);
         }
+        return books;
+    }
+    @PersistenceContext
+    private EntityManager entityManager;
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookModel> getBestSellers(){
+        String sql ="""
+                        SELECT a.*
+                        FROM BookInfo a
+                        JOIN BookDetail b ON a.isbn = b.isbn
+                        WHERE ranking LIKE '종합%'
+                        AND webCode = 'AL'
+                    """;
 
+        @SuppressWarnings("unchecked")
+        List<BookInfoEntity> bestBooks = entityManager.createNativeQuery(sql, BookInfoEntity.class).getResultList();
+        List<BookModel> books = new ArrayList<>();
+        for (BookInfoEntity bookInfo : bestBooks) {
+            BookModel book = modelMapper.map(bookInfo, BookModel.class);
+            for (BookDetailEntity bookDetail : bookInfo.getBookDetails()) {
+                if ("AL".equals(bookDetail.getId().getWebCode())) {
+                    book.setDescription(bookDetail.getDescription());
+                    book.setRanking(bookDetail.getRanking());
+                    break;
+                }
+            }
+            books.add(book);
+        }
+        books.sort(Comparator.comparingInt(this::extractRankingNumber));
+
+        return books;
+    }
+
+    private int extractRankingNumber(BookModel bookModel) {
+        String ranking = bookModel.getRanking();
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(ranking);
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group());
+        }
+        return 0;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookModel> getBooksByHighRatingReviews() {
+        String sql ="""               
+                        WITH reviewCnt AS (
+                        SELECT r.isbn
+                             , count(r.reviewId) totalReviewCnt
+                          FROM BookReview r
+                         WHERE r.rating > 5
+                        GROUP BY 1
+                        )
+                        SELECT a.*
+                          FROM reviewCnt r
+                          JOIN BookInfo a
+                            ON r.isbn = a.isbn
+                           AND a.categoryId IN (SELECT code
+                                                  FROM CodeDetail
+                                                 WHERE commonCode = 1)
+                        ORDER BY totalReviewCnt DESC
+                        LIMIT 10
+                """;
+
+        @SuppressWarnings("unchecked")
+        List<BookInfoEntity> highRatingBooks = entityManager.createNativeQuery(sql, BookInfoEntity.class).getResultList();
+        List<BookModel> books = new ArrayList<>();
+        for (BookInfoEntity bookInfo : highRatingBooks) {
+            BookModel book = modelMapper.map(bookInfo, BookModel.class);
+            for (BookDetailEntity bookDetail : bookInfo.getBookDetails()) {
+                if ("AL".equals(bookDetail.getId().getWebCode())) {
+                    book.setDescription(bookDetail.getDescription());
+                    book.setRanking(bookDetail.getRanking());
+                    break;
+                }
+            }
+            books.add(book);
+        }
         return books;
     }
 }
