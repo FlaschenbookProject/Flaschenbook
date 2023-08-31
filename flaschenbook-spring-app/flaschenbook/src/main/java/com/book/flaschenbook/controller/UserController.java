@@ -35,7 +35,7 @@ public class UserController {
     public ResponseEntity<?> register(@RequestBody UserModel userModel) {
         Optional<UserEntity> existingUser = userRepository.findByEmail(userModel.getEmail());
         if (existingUser.isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Email is already in use"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "이미 사용중인 이메일입니다."));
         }
 
         try {

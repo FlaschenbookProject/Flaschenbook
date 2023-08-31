@@ -57,7 +57,10 @@ function App() {
           <MainLogo />
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/register" element={<Register />} />
+            <Route
+              path="/register"
+              element={isLogged ? <Navigate to="/" /> : <Register />}
+            />
             <Route
               path="/login"
               element={isLogged ? <Navigate to="/" /> : <Login />}
