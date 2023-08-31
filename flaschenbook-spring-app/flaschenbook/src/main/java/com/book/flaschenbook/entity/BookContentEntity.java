@@ -17,7 +17,7 @@ public class BookContentEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer contentId;
 
-    @Column(length = 13)
+    
     private String isbn;
     private String content;
 }
