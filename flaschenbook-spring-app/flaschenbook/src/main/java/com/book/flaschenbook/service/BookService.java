@@ -6,6 +6,7 @@ import com.book.flaschenbook.model.BookModel;
 import java.util.List;
 
 public interface BookService {
-    List<BookDetailDTO> getNewReleases();
     List<BookModel> getNewReleasesBooks();
+    List<BookModel> getBestSellers();
+    List<BookModel> getBooksByHighRatingReviews();
 }

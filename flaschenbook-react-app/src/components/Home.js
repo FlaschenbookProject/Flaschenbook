@@ -10,10 +10,12 @@ import '../css/Main.css';
 class MainPage extends Component {
   state = {
     newReleases: [],
+    bestSellers: [],
+    highRatingBooks: [],
   };
 
   componentDidMount() {
-    axios.get('/books/new_releases')
+    axios.get('/api/books/new_book_info')
       .then(response => {
         console.log('Received new releases data:', response.data); // 데이터 확인용 로그
         this.setState({ newReleases: response.data });
@@ -21,10 +23,26 @@ class MainPage extends Component {
       .catch(error => {
         console.error('Error fetching new releases:', error);
       });
+    axios.get('/api/books/best_sellers')
+    .then(response => {
+        console.log('Received new releases data:', response.data); // 데이터 확인용 로그
+        this.setState({ bestSellers: response.data });
+      })
+      .catch(error => {
+        console.error('Error fetching new releases:', error);
+      });
+      axios.get('/api/books/high_rating_books')
+      .then(response => {
+          console.log('Received new releases data:', response.data); // 데이터 확인용 로그
+          this.setState({ highRatingBooks: response.data });
+        })
+        .catch(error => {
+          console.error('Error fetching new releases:', error);
+        });
   }
 
   render() {
-    const { newReleases } = this.state;
+    const { newReleases, bestSellers, highRatingBooks } = this.state;
 
     // 슬라이더 설정
     const sliderSettings = {
@@ -34,10 +52,26 @@ class MainPage extends Component {
       slidesToShow: 5,
       slidesToScroll: 3,
       initialSlide: 0,
+      arrows: false
     };
     
 
     // 이미지 슬라이더에 사용될 이미지 엘리먼트 생성
+    const newSliderImages = newReleases.map((book, index) => (
+      <div key={index} className="book-slider-item">
+        <img src={book.imageUrl} alt={book.title} className="book-image" />
+      </div>
+    ));
+    const bestSliderImages = bestSellers.map((book, index) => (
+      <div key={index} className="book-slider-item">
+        <img src={book.imageUrl} alt={book.title} className="book-image" />
+      </div>
+    ));
+    const highRatingSliderImages = highRatingBooks.map((book, index) => (
+      <div key={index} className="book-slider-item">
+        <img src={book.imageUrl} alt={book.title} className="book-image" />
+      </div>
+    ));
     const sliderImages = newReleases.map((book, index) => (
       <div key={index} className="book-slider-item">
         <img src={book.imageUrl} alt={book.title} className="book-image" />
@@ -51,7 +85,7 @@ class MainPage extends Component {
             <h1 className="book-section-title">이번 주 베스트셀러</h1>
             <div className="book-slider-container">
               <Slider {...sliderSettings}>
-                {sliderImages}
+                {bestSliderImages}
               </Slider>
             </div>
           </section>
@@ -59,20 +93,20 @@ class MainPage extends Component {
             <h1 className="book-section-title">이달의 신간</h1>
             <div className="book-slider-container">
               <Slider {...sliderSettings}>
-                {sliderImages}
-              </Slider>
-            </div>
-          </section>
-          <section className="book-section">
-            <h1 className="book-section-title">#장르의 책</h1>
-            <div className="book-slider-container">
-              <Slider {...sliderSettings}>
-                {sliderImages}
+                {newSliderImages}
               </Slider>
             </div>
           </section>
           <section className="book-section">
             <h1 className="book-section-title">독자들이 선택한 책</h1>
+            <div className="book-slider-container">
+              <Slider {...sliderSettings}>
+                {highRatingSliderImages}
+              </Slider>
+            </div>
+          </section>
+          <section className="book-section">
+            <h1 className="book-section-title">#장르의 책</h1>
             <div className="book-slider-container">
               <Slider {...sliderSettings}>
                 {sliderImages}
