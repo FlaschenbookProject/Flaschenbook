@@ -45,7 +45,7 @@ public class SurveyServiceImpl implements SurveyService{
     }
 
     private List<SurveyContentEntity> getRandomContentsByType(String type, int count) {
-        List<SurveyContentEntity> contentsByType = surveyContentRepository.findAllByType(type);
+        List<SurveyContentEntity> contentsByType = surveyContentRepository.findByType(type);
         Collections.shuffle(contentsByType);
         return contentsByType.subList(0, Math.min(contentsByType.size(), count));
     }
@@ -75,6 +75,7 @@ public class SurveyServiceImpl implements SurveyService{
         // Create and save SurveyDetailsEntities
         for (SurveyContentModel contentModel : selectedContentsDTO.getSelectedContents()) {
             SurveyDetailsEntity detailsEntity = new SurveyDetailsEntity();
+            detailsEntity.setSurveyId(surveysEntity.getSurveyId());
             detailsEntity.setSurvey(surveysEntity);
             detailsEntity.setContentType(contentModel.getType());
             detailsEntity.setContentId(contentModel.getId());
