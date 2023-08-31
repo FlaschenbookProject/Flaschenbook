@@ -21,7 +21,7 @@ z-index: 1;
     gap: 3vw; /* 컨트롤 간격을 뷰포트 단위로 설정 */
     top: 4vh; /* 상단 여백을 뷰포트 단위로 설정 */
     right: 3vw; /* 우측 여백을 뷰포트 단위로 설정 */
-    font-family: 'SCDream3', sans-serif; /* SCDream2.otf 폰트 적용 */
+    font-family: 'SCDream3', sans-serif;
     font-size: 2vmin;
   }
 

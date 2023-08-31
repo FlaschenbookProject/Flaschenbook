@@ -1,62 +1,89 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 import '../css/Logo.css'; // 전역 CSS 파일을 import
 import '../css/Font.css'; // Font.css 파일을 import
 import '../css/Main.css'; 
 
 class MainPage extends Component {
-    state = {
-      isLoggedIn: false,
-      userGenre: '',
-      userKeywords: '',
-      bestSellers: [],
-      newReleases: [], // 새로운 도서 목록을 저장할 상태
-      trendingBooks: [],
-      popularBooks: [],
+  state = {
+    newReleases: [],
+  };
+
+  componentDidMount() {
+    axios.get('/books/new_releases')
+      .then(response => {
+        console.log('Received new releases data:', response.data); // 데이터 확인용 로그
+        this.setState({ newReleases: response.data });
+      })
+      .catch(error => {
+        console.error('Error fetching new releases:', error);
+      });
+  }
+
+  render() {
+    const { newReleases } = this.state;
+
+    // 슬라이더 설정
+    const sliderSettings = {
+      dots: false,
+      infinite: false, // 무한 반복을 비활성화합니다.
+      speed: 500,
+      slidesToShow: 5,
+      slidesToScroll: 3,
+      initialSlide: 0,
     };
+    
 
-    componentDidMount() {
-      // 스프링에서 데이터를 가져오는 API 요청을 보냅니다.
-      axios.get('/books/new_releases')
-        .then(response => {
-          // API 응답에서 새로운 도서 목록을 추출하여 상태에 설정합니다.
-          this.setState({ newReleases: response.data });
-        })
-        .catch(error => {
-          console.error('API 호출 중 오류 발생:', error);
-        });
-    }
+    // 이미지 슬라이더에 사용될 이미지 엘리먼트 생성
+    const sliderImages = newReleases.map((book, index) => (
+      <div key={index} className="book-slider-item">
+        <img src={book.imageUrl} alt={book.title} className="book-image" />
+      </div>
+    ));
 
-    render() {
-      const { newReleases } = this.state;
-
-      const settings = {
-        dots: true,
-        infinite: true,
-        speed: 500,
-        slidesToShow: 5,
-        slidesToScroll: 1,
-      };
-      
     return (
       <div className="main-page">
         <main>
           <section className="book-section">
-            <h1 className="book-section-title">이번 달 신간</h1>
-            <Slider class="book-slider"{...settings}>
-              {newReleases.map(book => (
-                <div key={book.id}>
-                  <img src={book.imgUrl} alt={book.title} />
-                  <p>{book.title}</p>
-                </div>
-              ))}
-            </Slider>
+            <h1 className="book-section-title">이번 주 베스트셀러</h1>
+            <div className="book-slider-container">
+              <Slider {...sliderSettings}>
+                {sliderImages}
+              </Slider>
+            </div>
+          </section>
+          <section className="book-section">
+            <h1 className="book-section-title">이달의 신간</h1>
+            <div className="book-slider-container">
+              <Slider {...sliderSettings}>
+                {sliderImages}
+              </Slider>
+            </div>
+          </section>
+          <section className="book-section">
+            <h1 className="book-section-title">#장르의 책</h1>
+            <div className="book-slider-container">
+              <Slider {...sliderSettings}>
+                {sliderImages}
+              </Slider>
+            </div>
+          </section>
+          <section className="book-section">
+            <h1 className="book-section-title">독자들이 선택한 책</h1>
+            <div className="book-slider-container">
+              <Slider {...sliderSettings}>
+                {sliderImages}
+              </Slider>
+            </div>
           </section>
         </main>
       </div>
     );
   }
 }
+
 
 export default MainPage;

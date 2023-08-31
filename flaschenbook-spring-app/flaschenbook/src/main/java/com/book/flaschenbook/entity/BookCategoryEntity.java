@@ -1,13 +1,11 @@
 package com.book.flaschenbook.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @Entity
@@ -16,6 +14,9 @@ public class BookCategoryEntity implements Serializable {
 
     @Id
     private Integer categoryId;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<BookInfoEntity> books;
 
     @Column(length = 50)
     private String categoryName;

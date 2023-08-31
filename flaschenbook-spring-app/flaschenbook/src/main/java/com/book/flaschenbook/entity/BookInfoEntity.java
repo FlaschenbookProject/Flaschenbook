@@ -1,12 +1,7 @@
 package com.book.flaschenbook.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.*;
+
 import java.util.List;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -22,11 +17,17 @@ public class BookInfoEntity implements Serializable {
     @Column(length = 13)
     private String isbn;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoryId", insertable = false, updatable = false)
+    private BookCategoryEntity category;
+
     @OneToMany(mappedBy = "bookInfo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<BookDetailEntity> bookDetails;
 
     @Column(length = 700)
     private String title;
+
+    @Column(name = "categoryId", insertable = false, updatable = false)
     private Integer categoryId;
 
     @Column(length = 700)
