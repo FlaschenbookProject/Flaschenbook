@@ -33,12 +33,12 @@ public class SurveyServiceImpl implements SurveyService{
     @Override
     public List<ContentPairDTO> getRandomSurveyContentPairs() {
         List<SurveyContentEntity> sContents = getRandomContentsByType("S", 8);
-        List<SurveyContentEntity> gContents = getRandomContentsByType("G", 6);
+        List<SurveyContentEntity> cContents = getRandomContentsByType("C", 6);
         List<SurveyContentEntity> tContents = getRandomContentsByType("T", 6);
 
         List<ContentPairDTO> pairs = new ArrayList<>();
         pairs.addAll(createContentPairDTOs(sContents));
-        pairs.addAll(createContentPairDTOs(gContents));
+        pairs.addAll(createContentPairDTOs(cContents));
         pairs.addAll(createContentPairDTOs(tContents));
 
         return pairs;
