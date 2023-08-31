@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface BookRepository extends JpaRepository<BookInfoEntity, String> {
 
-    List<BookInfoEntity> findTop10ByPubDateBetweenOrderByPubDateDesc(Date startDate, Date endDate);
+    List<BookInfoEntity> findTop20ByPubDateBetweenOrderByPubDateDesc(Date startDate, Date endDate);
 }
 
