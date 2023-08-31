@@ -3,7 +3,7 @@
     position: relative;
     background-color: #fff; 
     color: #B9E0FD; 
-    padding: 10px 0;
+    padding: 30px 0;
     left: 2%;
     margin-left: 20px;
     text-align: left;
@@ -19,3 +19,30 @@
   .book-slider {
     margin-top: 30px; 
   }
+
+/* 이미지 슬라이더 컨테이너 */
+.book-slider-container {
+  padding: 20px; /* 이미지와 컨테이너의 간격 조정 */
+}
+
+/* 각 이미지 아이템 */
+.book-slider-item {
+  display: flex;
+  justify-content: center; /* 이미지를 가운데 정렬 */
+}
+
+/* 이미지 스타일 */
+.book-image {
+  max-width: 200px; /* 이미지 최대 너비 설정 */
+  height: 300px; /* 이미지 높이 자동 조정 */
+  margin: 0 10px; /* 이미지 간격 조정 */
+}
+
+.slick-prev::before,
+.slick-next::before {
+  opacity: 0;
+  display: none;
+}
+.slick-slide div {
+  cursor: pointer;
+}
