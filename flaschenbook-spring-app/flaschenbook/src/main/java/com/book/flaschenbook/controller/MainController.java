@@ -3,6 +3,8 @@ package com.book.flaschenbook.controller;
 import com.book.flaschenbook.dto.BookDetailDTO;
 import com.book.flaschenbook.dto.BookInfoDTO;
 import com.book.flaschenbook.entity.BookInfoEntity;
+import com.book.flaschenbook.model.BookModel;
+
 import com.book.flaschenbook.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -38,8 +40,9 @@ public class MainController {
     }
 
     @GetMapping("/new_book_info")
-    public ResponseEntity<List<BookInfoDTO>> getNewReleasesTest() {
-        List<BookInfoDTO> newReleasesTest = bookService.getNewReleasesBooks();
+    public ResponseEntity<List<BookModel>> getNewReleasesTest() {
+        List<BookModel> newReleasesTest = bookService.getNewReleasesBooks();
+
         return ResponseEntity.ok(newReleasesTest);
     }
 /*

@@ -1,28 +1,34 @@
 package com.book.flaschenbook.service;
 
 import com.book.flaschenbook.dto.BookDetailDTO;
-import com.book.flaschenbook.dto.BookInfoDTO;
-import com.book.flaschenbook.entity.BookCategoryEntity;
-import com.book.flaschenbook.entity.BookDetailEntity;
-import com.book.flaschenbook.entity.BookInfoEntity;
+import com.book.flaschenbook.entity.*;
+import com.book.flaschenbook.model.BookModel;
+
 import com.book.flaschenbook.repository.BookCategoryRepository;
 import com.book.flaschenbook.repository.BookRepository;
+import com.book.flaschenbook.repository.CodeDetailRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
+    private ModelMapper modelMapper;
     private final BookCategoryRepository bookCategoryRepository;
+    private final CodeDetailRepository codeDetailRepository;
 
     @Autowired
-    public BookServiceImpl(BookRepository bookRepository, BookCategoryRepository bookCategoryRepository) {
+    public BookServiceImpl(BookRepository bookRepository, BookCategoryRepository bookCategoryRepository, CodeDetailRepository codeDetailRepository, ModelMapper modelMapper) {
         this.bookRepository = bookRepository;
         this.bookCategoryRepository = bookCategoryRepository;
+        this.codeDetailRepository = codeDetailRepository;
+        this.modelMapper = modelMapper;
     }
     private List<BookDetailDTO> mapBookDetailEntityToDTO(List<BookInfoEntity> books) {
         List<BookDetailDTO> bookDetailDTOs = new ArrayList<>();
@@ -82,8 +88,7 @@ public class BookServiceImpl implements BookService {
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
         Date lastDayOfMonth = calendar.getTime();
 
-        // 이번 달의 최신 신간 10권의 BookInfoEntity를 조회
-        List<BookInfoEntity> recentBooks = bookRepository.findTop10ByPubDateBetweenOrderByPubDateDesc(
+        List<BookInfoEntity> recentBooks = bookRepository.findTop20ByPubDateBetweenOrderByPubDateDesc(
                 firstDayOfMonth, lastDayOfMonth
         );
 
@@ -92,34 +97,28 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookInfoDTO> getNewReleasesBooks() {
+    public List<BookModel> getNewReleasesBooks() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         Date firstDayOfMonth = calendar.getTime();
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
         Date lastDayOfMonth = calendar.getTime();
 
-        // 이번 달의 최신 신간 10권의 BookInfoEntity를 조회
-        List<BookInfoEntity> recentBooks = bookRepository.findTop10ByPubDateBetweenOrderByPubDateDesc(
+        List<Integer> categoryIdList = codeDetailRepository.findByCommonCode(1).stream()
+                .map(CodeDetailEntity::getCode).toList();
+        System.out.println(categoryIdList);
+        List<BookInfoEntity> recentBooks = bookRepository.findTop20ByPubDateBetweenOrderByPubDateDesc(
                 firstDayOfMonth, lastDayOfMonth
         );
+        List<BookInfoEntity> filteredBooks = recentBooks.stream()
+                .filter(book -> categoryIdList.contains(book.getCategoryId()))
+                .toList();
 
-        List<BookInfoDTO> books = new ArrayList<>();
+        List<BookModel> books = new ArrayList<>();
 
-        for (BookInfoEntity bookInfo : recentBooks) {
-            BookInfoDTO bookinfoDTO = new BookInfoDTO();
-            bookinfoDTO.setIsbn(bookInfo.getIsbn());
-            bookinfoDTO.setTitle(bookInfo.getTitle());
-            bookinfoDTO.setCategoryId(bookInfo.getCategoryId());
-            bookinfoDTO.setAuthor(bookInfo.getAuthor());
-            bookinfoDTO.setTranslator(bookInfo.getTranslator());
-            bookinfoDTO.setPublisher(bookInfo.getPublisher());
-            bookinfoDTO.setPubDate(bookInfo.getPubDate());
-            bookinfoDTO.setPrice(bookInfo.getPrice());
-            bookinfoDTO.setPageCnt(bookInfo.getPageCnt());
-            bookinfoDTO.setImageUrl(bookInfo.getImageUrl());
-
-            books.add(bookinfoDTO);
+        for (BookInfoEntity bookInfo : filteredBooks) {
+            BookModel book = modelMapper.map(bookInfo, BookModel.class);
+            books.add(book);
         }
 
         return books;
