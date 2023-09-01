@@ -9,3 +9,19 @@
   font-size: larger;
   font-weight: 500;
 }
+
+p,
+h1,
+h2,
+h3,
+h4 {
+  font-family: "SCDream2", sans-serif;
+  color: #212121;
+  font-weight: 700;
+}
+
+.book-title {
+  font-family: "SCDream4", sans-serif;
+  color: #212121;
+  font-weight: bold;
+}
