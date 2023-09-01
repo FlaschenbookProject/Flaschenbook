@@ -53,8 +53,8 @@ function MainLogo() {
             <a href="#" onClick={handleLogout} className="link-style">
               로그아웃
             </a>
-            <Link to="/my_page" className="link-style">
-              마이페이지
+            <Link to="/my-page" className="link-style">
+              날 위한 서재
             </Link>
           </>
         ) : (

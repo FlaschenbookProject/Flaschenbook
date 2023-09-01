@@ -12,4 +12,13 @@ public class BookDetailIdEntity implements Serializable {
     private String isbn;
     private String webCode;
 
+    public BookDetailIdEntity(String isbn, String webCode) {
+        this.isbn = isbn;
+        this.webCode = webCode;
+    }
+
+    public BookDetailIdEntity(){
+
+    }
+
 }

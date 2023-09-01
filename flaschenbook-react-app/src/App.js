@@ -67,7 +67,7 @@ function App() {
             />
             <Route path="/survey" element={<Survey />} />
             <Route
-              path="/my_page"
+              path="/my-page"
               element={isLogged ? <MyPage /> : <Navigate to="/login" />}
             />
           </Routes>
