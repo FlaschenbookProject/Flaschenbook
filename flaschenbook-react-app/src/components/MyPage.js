@@ -90,7 +90,10 @@ function MyPage() {
           </div>
         </div>
       </div>
-      <WordCloudComponent />
+      <hr style={{ borderTop: "3px solid #bbb" }} />
+      <div className="container">
+        <WordCloudComponent isbn={todayBook.isbn} />
+      </div>
       <hr style={{ borderTop: "3px solid #bbb" }} />
       <div className="row mt-5">
         <div className="col-md-12">
