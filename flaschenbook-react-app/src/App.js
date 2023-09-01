@@ -11,6 +11,7 @@ import Register from "./components/Register";
 import Login from "./components/Login";
 import Survey from "./components/Survey";
 import MyPage from "./components/MyPage";
+import Detail from "./components/BookDetail";
 import "font-awesome/css/font-awesome.min.css";
 import MainLogo from "./components/MainLogo";
 import Footer from "./components/Footer";
@@ -70,6 +71,7 @@ function App() {
               path="/my-page"
               element={isLogged ? <MyPage /> : <Navigate to="/login" />}
             />
+             <Route path="/detail/:isbn" element={<Detail />} /> 
           </Routes>
           <Footer />
         </div>

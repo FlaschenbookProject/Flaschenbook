@@ -77,3 +77,8 @@
     font-weight: 100;
     src: url("../../public/SCDream9.woff") format("woff");
 }
+
+@font-face {
+    font-family: "IM";
+    src: url("../../public/IM_Hyemin-Regular.woff") format("woff");
+}
