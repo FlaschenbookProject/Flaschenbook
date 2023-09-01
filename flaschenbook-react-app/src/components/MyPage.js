@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
+import "../css/Font.css"; // Font.css 파일을 import
+import "../css/Survey.css";
 
 function MyPage() {
   const [todayBook, setTodayBook] = useState([]);
   const [relatedBooks, setRelatedBooks] = useState([]);
   const sessionInfo = JSON.parse(localStorage.getItem("sessionInfo"));
   const userId = sessionInfo.userId;
+  const username = localStorage.getItem("username");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,14 +45,23 @@ function MyPage() {
     <div className="container mt-5">
       <div className="row">
         <div className="col-md-6 mx-auto text-center">
+          <h3 className="survey-question-text">
+            오늘의 도서가 파도를 타고 도착했어요.
+          </h3>
+          <h2 className="survey-question-text">
+            "{username}" 님 오늘은 이 책 어떤가요?
+          </h2>
           <img
             src={todayBook.imageUrl}
             alt="Book Cover"
             className="img-thumbnail"
           />
           <h2>{todayBook.title}</h2>
-          <p>Author: {todayBook.author}</p>
-          <p>Summary: {todayBook.description}</p>
+          <p>저자: {todayBook.author}</p>
+          <p>번역가: {todayBook.translator}</p>
+          <p>책 줄거리: {todayBook.kakaoDescription}</p>
+          <p>카테고리: {todayBook.categoryName}</p>
+          <p>가격: {todayBook.price}</p>
           <p>
             Purchase: You can purchase this book <a href="#">here</a>.
           </p>
