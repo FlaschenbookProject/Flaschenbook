@@ -22,7 +22,7 @@ function MainLogo() {
         console.log("Success:", data);
         localStorage.removeItem("sessionInfo");
         setIsLogged(false);
-        navigate("/");
+        window.location.href = "/";
       })
       .catch((error) => {
         console.error("Error:", error);

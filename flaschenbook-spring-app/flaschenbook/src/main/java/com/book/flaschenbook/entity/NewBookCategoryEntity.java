@@ -10,6 +10,6 @@ import lombok.Data;
 @Table(name = "NewBookCategory")
 public class NewBookCategoryEntity {
     @Id
-    private int categoryId;
+    private Long categoryId;
     private String categoryName;
 }

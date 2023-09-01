@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import "../css/Font.css"; // Font.css 파일을 import
 import "../css/Survey.css";
+import { WordCloudComponent } from "./WordCloud";
 
 function MyPage() {
   const [todayBook, setTodayBook] = useState([]);
@@ -27,6 +28,10 @@ function MyPage() {
   }, [userId]);
 
   useEffect(() => {
+    localStorage.setItem("todayBookIsbn", todayBook.isbn);
+  }, [todayBook]);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get("/api/my-page/related-books", {
@@ -42,7 +47,7 @@ function MyPage() {
   }, [userId]);
 
   return (
-    <div className="container mt-5">
+    <div className="container">
       <div className="row">
         <div className="col-md-6 mx-auto text-center">
           <h3 className="survey-question-text">
@@ -51,25 +56,50 @@ function MyPage() {
           <h2 className="survey-question-text">
             "{username}" 님 오늘은 이 책 어떤가요?
           </h2>
+        </div>
+      </div>
+      <div className="row mt-3 justify-content-center">
+        <div className="col-md-3">
           <img
             src={todayBook.imageUrl}
             alt="Book Cover"
             className="img-thumbnail"
+            style={{ maxWidth: "300px" }}
           />
-          <h2>{todayBook.title}</h2>
-          <p>저자: {todayBook.author}</p>
-          <p>번역가: {todayBook.translator}</p>
-          <p>책 줄거리: {todayBook.kakaoDescription}</p>
-          <p>카테고리: {todayBook.categoryName}</p>
-          <p>가격: {todayBook.price}</p>
+        </div>
+        <div className="col-md-5">
+          <div className="container">
+            <h2 className="book-title">{todayBook.title}</h2>
+            <p>
+              <b>카테고리</b> {todayBook.categoryName}
+            </p>
+            <p>
+              <b>저자</b> {todayBook.author}
+            </p>
+            {todayBook.translator && (
+              <p>
+                <b>번역가</b> {todayBook.translator}
+              </p>
+            )}
+            <h4>책 줄거리</h4>
+            <p>{todayBook.kakaoDescription}</p>
+            {/* <h4>구매링크</h4>
           <p>
-            Purchase: You can purchase this book <a href="#">here</a>.
-          </p>
+            <a href="#">here</a>.
+          </p> */}
+          </div>
         </div>
       </div>
+      <hr style={{ borderTop: "3px solid #bbb" }} />
+      <div className="container">
+        <WordCloudComponent isbn={todayBook.isbn} />
+      </div>
+      <hr style={{ borderTop: "3px solid #bbb" }} />
       <div className="row mt-5">
         <div className="col-md-12">
-          <h3 className="text-center">Related Books</h3>
+          <h3 className="survey-question-text">
+            "{username}" 님 이런 도서도 있어요
+          </h3>
           <div style={{ whiteSpace: "nowrap", overflowX: "auto" }}>
             {relatedBooks.map((book, index) => (
               <div

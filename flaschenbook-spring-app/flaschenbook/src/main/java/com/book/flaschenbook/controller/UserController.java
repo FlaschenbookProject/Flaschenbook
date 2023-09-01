@@ -7,10 +7,10 @@ import com.book.flaschenbook.entity.SessionDataId;
 import com.book.flaschenbook.entity.UserEntity;
 import com.book.flaschenbook.model.UserModel;
 import com.book.flaschenbook.repository.UserRepository;
+import com.book.flaschenbook.service.MyPageService;
 import com.book.flaschenbook.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.modelmapper.spi.ErrorMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,10 +25,12 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final UserService userService;
+    private final MyPageService myPageService;
 
-    public UserController(UserRepository userRepository, UserService userService) {
+    public UserController(UserRepository userRepository, UserService userService, MyPageService myPageService) {
         this.userRepository = userRepository;
         this.userService = userService;
+        this.myPageService = myPageService;
     }
 
     @PostMapping("/register")

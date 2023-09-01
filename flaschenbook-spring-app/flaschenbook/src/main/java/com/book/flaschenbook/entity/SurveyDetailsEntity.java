@@ -23,6 +23,10 @@ public class SurveyDetailsEntity {
     private BookContentEntity bookContent;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contentId",referencedColumnName = "categoryId", insertable = false, updatable = false)
+    private NewBookCategoryEntity bookCategory;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "surveyId", referencedColumnName = "surveyId", insertable = false, updatable = false)
     private SurveysEntity survey;
 }
