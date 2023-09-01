@@ -26,39 +26,33 @@ public class MainController {
     }
 
 
-/*
     @GetMapping("/best_sellers")
-    public ResponseEntity<List<BookInfoModel>> getBestsellers() {
-        List<BookInfoModel> bestsellers = bookService.getBestsellers();
+    public ResponseEntity<List<BookModel>> getBestsellers() {
+        List<BookModel> bestsellers = bookService.getBestSellers();
         return ResponseEntity.ok(bestsellers);
     }
-*/
-    @GetMapping("/new_releases")
-    public ResponseEntity<List<BookDetailDTO>> getNewReleases() {
-        List<BookDetailDTO> newReleases = bookService.getNewReleases();
-        return ResponseEntity.ok(newReleases);
-    }
-
     @GetMapping("/new_book_info")
     public ResponseEntity<List<BookModel>> getNewReleasesTest() {
         List<BookModel> newReleasesTest = bookService.getNewReleasesBooks();
 
         return ResponseEntity.ok(newReleasesTest);
     }
+
 /*
     @GetMapping("/genre_books")
     public ResponseEntity<List<BookInfoModel>> getGenreBooks() {
         List<BookInfoModel> genreBooks = bookService.getGenreBooks();
         return ResponseEntity.ok(genreBooks);
     }
+*/
 
-    @GetMapping("/most_reviewed_books")
-    public ResponseEntity<List<BookInfoModel>> getMostReviewedBooks() {
-        List<BookInfoModel> mostReviewedBooks = bookService.getMostReviewedBooks();
+    @GetMapping("/high_rating_books")
+    public ResponseEntity<List<BookModel>> getMostReviewedBooks() {
+        List<BookModel> mostReviewedBooks = bookService.getBooksByHighRatingReviews();
         return ResponseEntity.ok(mostReviewedBooks);
     }
 
-    @GetMapping("/rc_genre_books")
+/*    @GetMapping("/rc_genre_books")
     public ResponseEntity<List<BookInfoModel>> getRecommendationGenreBooks() {
         List<BookInfoModel> recommendationGenreBooks = bookService.getRecommendationGenreBooks();
         return ResponseEntity.ok(recommendationGenreBooks);

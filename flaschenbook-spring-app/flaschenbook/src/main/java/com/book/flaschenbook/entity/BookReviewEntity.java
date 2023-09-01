@@ -16,6 +16,11 @@ public class BookReviewEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer reviewId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("isbn")
+    @JoinColumn(name = "isbn")
+    private BookInfoEntity bookInfo;
+
     @Column(length = 700)
     private String isbn;
 
