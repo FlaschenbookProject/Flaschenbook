@@ -9,11 +9,11 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "BookInfo")
+@Table(name = "BookReview")
 public class BookReviewEntity implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer reviewId;
 
     @ManyToOne(fetch = FetchType.LAZY)

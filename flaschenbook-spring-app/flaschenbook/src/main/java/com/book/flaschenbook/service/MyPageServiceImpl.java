@@ -5,6 +5,10 @@ import com.book.flaschenbook.entity.*;
 import com.book.flaschenbook.model.BookModel;
 import com.book.flaschenbook.model.SurveyContentModel;
 import com.book.flaschenbook.repository.*;
+import kr.co.shineware.nlp.komoran.constant.DEFAULT_MODEL;
+import kr.co.shineware.nlp.komoran.core.Komoran;
+import kr.co.shineware.nlp.komoran.model.KomoranResult;
+import lombok.Getter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -13,16 +17,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
+
 @Service
-public class MyPageServiceImpl implements MyPageService{
+public class MyPageServiceImpl implements MyPageService {
     private final SurveysRepository surveysRepository;
     private final SurveyDetailsRepository surveyDetailsRepository;
     private final BookInfoRepository bookInfoRepository;
@@ -32,9 +35,11 @@ public class MyPageServiceImpl implements MyPageService{
     private final SurveySummaryRepository surveySummaryRepository;
     private final BookDetailRepository bookDetailRepository;
     private final BookCategoryRepository bookCategoryRepository;
+    private final BookReviewRepository bookReviewRepository;
+    private final NewBookCategoryRepository newBookCategoryRepository;
 
     @Autowired
-    public MyPageServiceImpl(SurveysRepository surveysRepository, SurveyDetailsRepository surveyDetailsRepository, BookInfoRepository bookInfoRepository, BookContentRepository bookContentRepository, RecommendedBooksRepository recommendedBooksRepository, ModelMapper modelMapper, SurveySummaryRepository surveySummaryRepository, BookDetailRepository bookDetailRepository, BookCategoryRepository bookCategoryRepository) {
+    public MyPageServiceImpl(SurveysRepository surveysRepository, SurveyDetailsRepository surveyDetailsRepository, BookInfoRepository bookInfoRepository, BookContentRepository bookContentRepository, RecommendedBooksRepository recommendedBooksRepository, ModelMapper modelMapper, SurveySummaryRepository surveySummaryRepository, BookDetailRepository bookDetailRepository, BookCategoryRepository bookCategoryRepository, BookReviewRepository bookReviewRepository, NewBookCategoryRepository newBookCategoryRepository) {
         this.surveysRepository = surveysRepository;
         this.surveyDetailsRepository = surveyDetailsRepository;
         this.bookInfoRepository = bookInfoRepository;
@@ -44,15 +49,23 @@ public class MyPageServiceImpl implements MyPageService{
         this.surveySummaryRepository = surveySummaryRepository;
         this.bookDetailRepository = bookDetailRepository;
         this.bookCategoryRepository = bookCategoryRepository;
+        this.bookReviewRepository = bookReviewRepository;
+        this.newBookCategoryRepository = newBookCategoryRepository;
     }
+
     Date today = Date.valueOf(LocalDate.now());
+
+    @Getter
+    public String positiveReviewsText = null;
+    @Getter
+    public String negativeReviewsText = null;
 
     @Override
     public BookModel getTodayBook(int userId) {
-        BookInfoEntity recommendedBook = null;
+        BookInfoEntity recommendedBook;
 
         RecommendedBooksEntity recommendedBooksEntity = recommendedBooksRepository.findByUserIdAndRecommendDate(userId, today);
-        if (recommendedBooksEntity != null){
+        if (recommendedBooksEntity != null) {
             recommendedBook = bookInfoRepository.findByIsbn(recommendedBooksEntity.getIsbn());
             return modelMapper.map(recommendedBook, BookModel.class);
         }
@@ -73,6 +86,7 @@ public class MyPageServiceImpl implements MyPageService{
         }
 
         recommendedBook = bookInfoRepository.findByIsbn(isbn);
+        resetReviewTexts();
         saveRecommendedBook(userId, recommendedBook);
 
         return modelMapper.map(recommendedBook, BookModel.class);
@@ -98,7 +112,7 @@ public class MyPageServiceImpl implements MyPageService{
             bookDetailDTO.setNaverDescription(bookDetailEntityNA.get().getDescription());
             bookDetailDTO.setNaverSaleUrl(bookDetailEntityNA.get().getSaleUrl());
             bookDetailDTO.setNaverSalePrice(bookDetailEntityNA.get().getSalePrice());
-       });
+        });
 
         bookDetailEntityKK.ifPresent(bookDetailEntity -> {
             bookDetailDTO.setKakaoDescription(bookDetailEntityKK.get().getDescription());
@@ -111,16 +125,19 @@ public class MyPageServiceImpl implements MyPageService{
 
 
     @Override
-    public List<BookModel> getRelatedBooks(int userId){
+    public List<BookModel> getRelatedBooks(int userId) {
         List<SurveySummaryEntity> surveySummaries = surveySummaryRepository.findByTypeAndUserId("C", userId);
         List<Integer> newCategoryIds = surveySummaries.stream()
                 .map(summary -> Integer.parseInt(summary.getContentId()))
                 .collect(Collectors.toList());
 
         List<BookInfoEntity> relatedBooks = bookInfoRepository.findByNewCategoryIds(newCategoryIds);
+
+        // Shuffle the list
+        Collections.shuffle(relatedBooks);
+
         return relatedBooks.stream()
-                .sorted(Comparator.comparing(BookInfoEntity::getPubDate).reversed())
-                .limit(5)
+                .limit(6)
                 .map(book -> modelMapper.map(book, BookModel.class)).toList();
     }
 
@@ -153,7 +170,13 @@ public class MyPageServiceImpl implements MyPageService{
                         });
 
                     }
-
+                    case "C" -> {
+                        Optional<NewBookCategoryEntity> bookCategory = newBookCategoryRepository.findById(Integer.parseInt(contentId));
+                        bookCategory.ifPresent(bookCategoryEntity -> {
+                            surveyContentModel.setId(String.valueOf(bookCategoryEntity.getCategoryId()));
+                            surveyContentModel.setContent(bookCategoryEntity.getCategoryName());
+                        });
+                    }
                 }
                 contents.add(surveyContentModel);
             }
@@ -173,6 +196,48 @@ public class MyPageServiceImpl implements MyPageService{
         recommendedBooksEntity.setIsbn(book.getIsbn());
         recommendedBooksEntity.setRecommendDate(today);
         recommendedBooksRepository.save(recommendedBooksEntity);
+    }
+
+    public void getBookReviews(String isbn) {
+        List<BookReviewEntity> reviews = bookReviewRepository.findByIsbn(isbn);
+        classifyReviews(reviews);
+    }
+
+    public void classifyReviews(List<BookReviewEntity> reviews) {
+        List<String> positiveReviews = new ArrayList<>();
+        List<String> negativeReviews = new ArrayList<>();
+
+        for (BookReviewEntity review : reviews) {
+            BigDecimal rating = review.getRating();
+            if (rating.compareTo(BigDecimal.valueOf(5)) >= 0) {
+                positiveReviews.add(review.getContent());
+            } else if (rating.compareTo(BigDecimal.valueOf(3)) <= 0) {
+                negativeReviews.add(review.getContent());
+            }
+        }
+        positiveReviewsText = processReviewText(String.join(" ", positiveReviews));
+        negativeReviewsText = processReviewText(String.join(" ", negativeReviews));
+    }
+
+    public String processReviewText(String text) {
+        Komoran komoran = new Komoran(DEFAULT_MODEL.LIGHT);
+        KomoranResult analyzeResultList = komoran.analyze(text);
+        return String.join(" ", analyzeResultList.getNouns());
+    }
+
+    public void resetReviewTexts() {
+        this.positiveReviewsText = null;
+        this.negativeReviewsText = null;
+    }
+
+    public List<String> getReviewTexts() {
+        List<String> reviewTextList = null;
+        if (this.positiveReviewsText != null && this.negativeReviewsText != null) {
+            reviewTextList = new ArrayList<>();
+            reviewTextList.add(this.positiveReviewsText);
+            reviewTextList.add(this.negativeReviewsText);
+        }
+        return reviewTextList;
     }
 
 }

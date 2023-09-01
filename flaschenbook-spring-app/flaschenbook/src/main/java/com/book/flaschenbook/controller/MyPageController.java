@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -32,5 +33,20 @@ public class MyPageController {
     public ResponseEntity<List<BookModel>> getRecommendedBooks(@RequestParam int userId) {
         List<BookModel> relatedBooks = myPageService.getRelatedBooks(userId);
         return ResponseEntity.ok(relatedBooks);
+    }
+
+    @GetMapping("/book-words")
+    public ResponseEntity<List<String>> getWordCloudSourceText(@RequestParam String isbn) {
+        List<String> textList = myPageService.getReviewTexts();
+        if (textList != null){
+            return ResponseEntity.ok(textList);
+        }
+        try{
+            myPageService.getBookReviews(isbn);
+        }
+        catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        return ResponseEntity.ok(myPageService.getReviewTexts());
     }
 }
