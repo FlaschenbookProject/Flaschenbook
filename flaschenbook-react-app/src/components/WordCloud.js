@@ -25,14 +25,14 @@ const options = {
   fontFamily: "SCDream7",
 };
 
-export const WordCloudComponent = () => {
+export const WordCloudComponent = ({ isbn }) => {
   const [positiveSourceText, setPositiveSourceText] = useState("");
   const [negativeSourceText, setNegativeSourceText] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!isbn) return;
       try {
-        const isbn = localStorage.getItem("todayBookIsbn");
         const response = await fetch("/api/my-page/book-words?isbn=" + isbn);
         const data = await response.json();
         setPositiveSourceText(data[0]);
@@ -42,7 +42,7 @@ export const WordCloudComponent = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [isbn]);
 
   const positiveWords = getWordsArray(positiveSourceText);
   const negativeWords = getWordsArray(negativeSourceText);
