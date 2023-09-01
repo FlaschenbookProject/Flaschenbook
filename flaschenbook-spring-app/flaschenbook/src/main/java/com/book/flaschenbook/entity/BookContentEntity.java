@@ -1,11 +1,6 @@
 package com.book.flaschenbook.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -16,6 +11,12 @@ public class BookContentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long contentId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("isbn")
+    @JoinColumn(name = "isbn")
+    private BookInfoEntity bookInfo;
+
     private String isbn;
     private String content;
 }
