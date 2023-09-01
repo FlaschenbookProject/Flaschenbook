@@ -76,7 +76,6 @@ public class UserController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody LogoutRequestDTO logoutRequestDTO) {
         userService.logout(logoutRequestDTO);
-        myPageService.resetReviewTexts();
         return ResponseEntity.ok().body("Logout successful");
     }
 

@@ -8,7 +8,6 @@ import com.book.flaschenbook.repository.*;
 import kr.co.shineware.nlp.komoran.constant.DEFAULT_MODEL;
 import kr.co.shineware.nlp.komoran.core.Komoran;
 import kr.co.shineware.nlp.komoran.model.KomoranResult;
-import lombok.Getter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -55,11 +54,6 @@ public class MyPageServiceImpl implements MyPageService {
 
     Date today = Date.valueOf(LocalDate.now());
 
-    @Getter
-    public String positiveReviewsText = null;
-    @Getter
-    public String negativeReviewsText = null;
-
     @Override
     public BookModel getTodayBook(int userId) {
         BookInfoEntity recommendedBook;
@@ -86,7 +80,6 @@ public class MyPageServiceImpl implements MyPageService {
         }
 
         recommendedBook = bookInfoRepository.findByIsbn(isbn);
-        resetReviewTexts();
         saveRecommendedBook(userId, recommendedBook);
 
         return modelMapper.map(recommendedBook, BookModel.class);
@@ -198,12 +191,12 @@ public class MyPageServiceImpl implements MyPageService {
         recommendedBooksRepository.save(recommendedBooksEntity);
     }
 
-    public void getBookReviews(String isbn) {
+    public List<String> getBookReviews(String isbn) {
         List<BookReviewEntity> reviews = bookReviewRepository.findByIsbn(isbn);
-        classifyReviews(reviews);
+        return classifyReviews(reviews);
     }
 
-    public void classifyReviews(List<BookReviewEntity> reviews) {
+    public List<String> classifyReviews(List<BookReviewEntity> reviews) {
         List<String> positiveReviews = new ArrayList<>();
         List<String> negativeReviews = new ArrayList<>();
 
@@ -215,29 +208,19 @@ public class MyPageServiceImpl implements MyPageService {
                 negativeReviews.add(review.getContent());
             }
         }
-        positiveReviewsText = processReviewText(String.join(" ", positiveReviews));
-        negativeReviewsText = processReviewText(String.join(" ", negativeReviews));
+        String positiveReviewsText = processReviewText(String.join(" ", positiveReviews));
+        String negativeReviewsText = processReviewText(String.join(" ", negativeReviews));
+        List<String> texts = new ArrayList<>();
+        texts.add(positiveReviewsText);
+        texts.add(negativeReviewsText);
+
+        return texts;
     }
 
     public String processReviewText(String text) {
         Komoran komoran = new Komoran(DEFAULT_MODEL.LIGHT);
         KomoranResult analyzeResultList = komoran.analyze(text);
         return String.join(" ", analyzeResultList.getNouns());
-    }
-
-    public void resetReviewTexts() {
-        this.positiveReviewsText = null;
-        this.negativeReviewsText = null;
-    }
-
-    public List<String> getReviewTexts() {
-        List<String> reviewTextList = null;
-        if (this.positiveReviewsText != null && this.negativeReviewsText != null) {
-            reviewTextList = new ArrayList<>();
-            reviewTextList.add(this.positiveReviewsText);
-            reviewTextList.add(this.negativeReviewsText);
-        }
-        return reviewTextList;
     }
 
 }

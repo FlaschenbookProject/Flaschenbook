@@ -10,7 +10,5 @@ public interface MyPageService {
     BookModel getTodayBook(int userId);
     List<BookModel> getRelatedBooks(int userId);
     BookDetailDTO getBookDetail(BookModel bookModel);
-    void getBookReviews(String isbn);
-    List<String> getReviewTexts();
-    void resetReviewTexts();
+    List<String> getBookReviews(String isbn);
 }
