@@ -1,0 +1,79 @@
+
+.book-section {
+    position: relative;
+    background-color: #fff; 
+    color: #B9E0FD; 
+    padding: 30px 0;
+    left: 2%;
+    margin-left: 20px;
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  
+  .book-section-title {
+    font-size: 5vmin;
+    font-family: 'Pado', sans-serif;
+    color: #5AB2FF;
+    margin-bottom: 30px; 
+  }
+  
+  .book-slider {
+    margin-top: 30px; 
+  }
+
+/* 이미지 슬라이더 컨테이너 */
+.book-slider-container {
+  padding: 0px; /* 이미지와 컨테이너의 간격 조정 */
+}
+
+/* 각 이미지 아이템 */
+.book-slider-item {
+  display: flex;
+  justify-content: center; /* 이미지를 가운데 정렬 */
+  margin-right: 10px; 
+  position: relative;
+}
+
+/* 이미지 스타일 */
+.book-image {
+  max-width: 30vh; /* 이미지 최대 너비 설정 */
+  height: 40vh; /* 이미지 높이 자동 조정 */
+  margin: 10 20px; /* 이미지 간격 조정 */
+}
+
+.book-info {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); 
+  color: white;
+  opacity: 0;
+  transition: opacity 0.3s; 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: 'SCDream2'
+}
+
+.book-slider-item:hover .book-info {
+  opacity: 1;
+}
+
+.book-title{
+  font-family: 'SCDream3';
+}
+
+.book-description {
+  overflow: hidden; /* 넘치는 부분 숨김 */
+  text-overflow: ellipsis; /* 넘치는 부분에 ... 표시 */
+  display: -webkit-box;
+  -webkit-line-clamp: 5; /* 표시할 줄 수 설정 */
+  -webkit-box-orient: vertical;
+  white-space: normal; /* 줄 바꿈 허용 */
+  font-family: 'SCDream2';
+}

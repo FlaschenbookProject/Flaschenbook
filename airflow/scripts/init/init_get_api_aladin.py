@@ -8,7 +8,7 @@ from utils.api_operations import get_isbn_list
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from utils.file_operations import get_file_cnt
-from utils.api_operations import save_json_file
+from utils.file_operations import save_json_file
 
 
 def fetch_api_data(isbn_list, api_keys):
@@ -77,9 +77,9 @@ def save_json():
     BUCKET_NAME = os.environ.get("BUCKET_NAME")
     SITE = "aladin"
     TODAY = date.today().strftime("%Y-%m-%d")
-    # TODAY = "2023-08-16"
+    # TODAY = "2023-08-17"
 
-    isbn_keys = [os.environ.get(f"TTB_KEY{i}") for i in range(2, 12)]
+    isbn_keys = [os.environ.get(f"TTB_KEY{i}") for i in range(2, 16)]
 
     csv_file_dir = f'raw/isbn/{TODAY}/init/'
     # csv 파일 개수를 조회

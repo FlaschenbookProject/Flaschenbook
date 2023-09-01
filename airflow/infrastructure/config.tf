@@ -1,10 +1,10 @@
 variable "aws_region" {
-  default = "ap-northeast-2"
+  default = "ap-southeast-1"
 }
 
 variable "availability_zones" {
   type    = list(string)
-  default = ["ap-northeast-2a", "ap-northeast-2b", "ap-northeast-2c"]
+  default = ["ap-southeast-1a", "ap-southeast-1b", "ap-southeast-1c"]
 }
 
 variable "project_name" {
@@ -12,7 +12,7 @@ variable "project_name" {
 }
 
 variable "s3_bucket" {
-  default = "de-4-1-airflow"
+  default = "flaschenbook-airflow"
 }
 
 variable "fernet_key" {
@@ -32,7 +32,7 @@ variable "base_cidr_block" {
 }
 
 variable "log_group_name" {
-  default = "ecs/flaschenbookaf"
+  default = "ecs/flaschenbook-af"
 }
 
 variable "image_version" {

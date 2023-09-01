@@ -1,10 +1,10 @@
 import requests
 import os
-from datetime import datetime
-import pandas as pd
-from dotenv import load_dotenv
+import sys
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+from utils.file_operations import save_to_csv
+from utils.file_operations import upload_files_to_s3
 
 
 # JSON 데이터를 가져오는 함수
@@ -34,8 +34,9 @@ def get_json_data(page_no, api_key):
         return None
 
 
-def extract_isbn(data):
+def extract_isbn(data, today):
     if data is None:
+        print("데이터 없음")
         return []
 
     isbn = []
@@ -44,44 +45,42 @@ def extract_isbn(data):
     for item in items:
         if item.get("pubDate") == today:
             isbn.append(item.get("isbn13"))
+            print(item.get("isbn13"))
 
     return isbn
 
 
-# csv를 저장
-def save_to_csv(isbn_list, filename):
-    df = pd.DataFrame({"ISBN": isbn_list})  # 데이터프레임 생성
-    df.to_csv(filename, index=False)
-
-
 def main():
-    load_dotenv()  # env 파일 로드
-
     api_key = os.getenv("TTB_KEY")
+    bucket_name = os.getenv("BUCKET_NAME")
+
+    if len(sys.argv) < 2:
+        sys.exit(1)
+
+    today = sys.argv[1]
+    print(f"{today} New Book")
+
     new_isbn_list = []  # 오늘 날짜의 신간 isbn을 저장할 List
 
     # limit 호출 횟수를 감안하여 첫 번째 페이지는 따로 탐색해 전체 페이지 확인 후 isbn 작업 처리
     json_data = get_json_data(1, api_key)
     total_page = int(json_data["totalResults"]
                      ) // int(json_data["itemsPerPage"])
-    new_isbn_list.extend(extract_isbn(json_data))
+    new_isbn_list.extend(extract_isbn(json_data, today))
 
     for i in range(2, total_page + 1):
         data = get_json_data(i, api_key)
-        new_isbn_list.extend(extract_isbn(data))
+        new_isbn_list.extend(extract_isbn(data, today))
         print(f"success page number: {i}")
 
     # csv 파일 저장
-    output_path = "airflow/scripts/data/isbn"
+    output_path = "data/isbn/"
     os.makedirs(output_path, exist_ok=True)
     csv_filename = os.path.join(output_path, f"raw+isbn+{today}+new.csv")
 
     save_to_csv(new_isbn_list, csv_filename)
-
-    print(f"complete to save {today}.csv")
+    upload_files_to_s3(bucket_name, output_path)
 
 
 if __name__ == "__main__":
-    # 추후 airflow 환경의 날짜를 가지고 와 해당 날짜를 조회하도록 수정 예정
-    today = datetime.now().strftime("%Y-%m-%d")
     main()

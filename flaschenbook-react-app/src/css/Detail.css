@@ -1,0 +1,83 @@
+
+  /* 책 이미지 */
+.info-item img {
+    width: 200px;
+    height: 300px;
+    margin-right: 20px;
+  }
+  
+  /* 책 정보 (제목, 저자, 출판사, 출판일, 가격) */
+.info-item h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color:#f9f9f9;
+    font-family: 'SCDream3';
+  }
+  
+ .info-item p {
+    font-size: 16px;
+    color: #f9f9f9;
+    margin: 0;
+    font-family: 'SCDream3'
+  }
+  
+  /* 판매 사이트 컨테이너 */
+  .sale-sites {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    background-color:#5AB2FF;
+  }
+  
+  /* 판매 사이트 아이템 */
+  .sale-site {
+    text-align: center;
+    flex-grow: 1;
+    padding: 10px;
+  }
+  
+  .sale-site img {
+    max-width: 80px;
+    height: auto;
+  }
+  
+  .sale-site .info-item {
+    margin-top: 10px;
+    font-size: 15px;
+    color: #f9f9f9;
+    font-family: 'SCDream3';
+  }
+
+  .section-title {
+    padding: 10px;
+    background-color:#5AB2FF;
+    align-items: center;
+    text-align: center;
+  }
+
+  .section-title h2 {
+    color: #f9f9f9;
+    font-family: 'SCDream4';
+    font-size: 20px;
+  }
+
+  .section-title p {
+    color: #f9f9f9;
+    font-family: 'SCDream3';
+  }
+  
+  /* 책 내용 */
+  .book-content {
+    padding: 20px;
+    background-color:#5AB2FF;
+  }
+  
+  .book-content p {
+    font-size: 18px;
+    line-height: 1.5;
+    color:  #f9f9f9;
+    font-family: 'Da';
+    margin-bottom: 10px;
+    font-family: "IM";
+  }

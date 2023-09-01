@@ -5,7 +5,6 @@ import os
 from io import StringIO
 import requests
 import time
-import json
 import csv
 
 
@@ -24,7 +23,9 @@ def get_isbn_list(bucket_name: str, object_key: str) -> List[str]:
     response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
     csv_content = response['Body'].read().decode('utf-8')
     df = pd.read_csv(StringIO(csv_content))
+    df = df.dropna(subset=['ISBN'])
     df['ISBN'] = df['ISBN'].astype(str).str.split('.').str[0]
+
     return df['ISBN'].tolist()
 
 
@@ -98,7 +99,7 @@ def get_headers(site: str, key_num: int) -> Dict[str, str]:
 
 def save_csv_file(file_path: str, isbn_list: List[str]) -> None:
     """
-    ISBN 목록을 주어진 경로의 CSV 파일로 저장합니다.
+    ISBN 목록을 주어진 경로의 CSV 파일로 저장합니다. (init이 아닌 데이터 로직에서 사용하는 save_csv_file은 목적에 따라 file_operations로 이동)
 
     Args:
         file_path (str): ISBN 목록을 저장할 파일 경로
@@ -114,23 +115,6 @@ def save_csv_file(file_path: str, isbn_list: List[str]) -> None:
         writer.writerow(["ISBN"])
         for isbn in isbn_list:
             writer.writerow([isbn])
-
-
-def save_json_file(file_path: str, items: Dict[str, Dict]) -> None:
-    """
-    주어진 항목을 JSON 파일로 저장합니다.
-
-    Args:
-        file_path (str): 항목을 저장할 파일 경로
-        items (list or dict): JSON 형식으로 저장할 항목
-    """
-    directory = os.path.dirname(file_path)
-
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-    with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(items, f, ensure_ascii=False, indent=4)
 
 
 def fetch_api_data(isbn_list: List[str], site: str) -> Dict[str, Dict]:
@@ -198,13 +182,21 @@ def fetch_api_data(isbn_list: List[str], site: str) -> Dict[str, Dict]:
             print(f"Error while fetching data: {e}")
 
         book_info = response.json()
-        if site == 'naver' and book_info['total'] == 0:
+
+        # book_info가 None인 경우 모든 웹사이트에 대해 확인할 필요 없음
+        if book_info is None:
             print(f'{site} {i} 번째 {isbn} book info 없음!')
             continue
-        elif site == 'kakao' and book_info['meta']['total_count'] == 0:
+
+        # key가 없는 경우를 대비해 get으로 수정
+        if site == 'naver' and book_info.get('total') == 0:
             print(f'{site} {i} 번째 {isbn} book info 없음!')
             continue
-        elif site == 'aladin' and book_info['errorCode'] == 8:
+        elif site == 'kakao':
+            if book_info.get('meta') is None or book_info.get('meta').get('total_count') == 0:
+                print(f'{site} {i} 번째 {isbn} book info 없음!')
+                continue
+        elif site == 'aladin' and book_info.get('errorCode') == 8:
             print(f'{site} {i} 번째 {isbn} book info 없음!')
             continue
 
