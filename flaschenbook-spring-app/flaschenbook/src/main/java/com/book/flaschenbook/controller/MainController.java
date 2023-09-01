@@ -7,8 +7,10 @@ import com.book.flaschenbook.model.BookModel;
 
 import com.book.flaschenbook.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,13 +40,11 @@ public class MainController {
         return ResponseEntity.ok(newReleasesTest);
     }
 
-/*
     @GetMapping("/genre_books")
-    public ResponseEntity<List<BookInfoModel>> getGenreBooks() {
-        List<BookInfoModel> genreBooks = bookService.getGenreBooks();
+    public ResponseEntity<List<BookModel>> getGenreBooks() {
+        List<BookModel> genreBooks = bookService.getRandomGenreBooks();
         return ResponseEntity.ok(genreBooks);
     }
-*/
 
     @GetMapping("/high_rating_books")
     public ResponseEntity<List<BookModel>> getMostReviewedBooks() {
@@ -69,4 +69,14 @@ public class MainController {
         List<BookInfoModel> recommendationBooks = bookService.getRecommendationBooks();
         return ResponseEntity.ok(recommendationBooks);
     }*/
+
+    @GetMapping("/{isbn}")
+    public ResponseEntity<BookDetailDTO> getBookInfo(@PathVariable String isbn) {
+        BookDetailDTO bookDetail = bookService.getBookDetail(isbn);
+        if (bookDetail != null) {
+            return new ResponseEntity<>(bookDetail, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }

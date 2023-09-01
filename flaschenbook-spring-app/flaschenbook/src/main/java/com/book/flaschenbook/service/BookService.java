@@ -9,4 +9,7 @@ public interface BookService {
     List<BookModel> getNewReleasesBooks();
     List<BookModel> getBestSellers();
     List<BookModel> getBooksByHighRatingReviews();
+    List<BookModel> getRandomGenreBooks();
+
+    BookDetailDTO getBookDetail(String isbn);
 }

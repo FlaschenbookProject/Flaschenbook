@@ -24,4 +24,6 @@ public class BookModel {
     private String saleUrl;
     private Integer salePrice;
     private String saleStatus;
+
+    private String genre;
 }
