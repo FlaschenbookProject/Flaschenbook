@@ -61,7 +61,11 @@ export const WordCloudComponent = () => {
         <h3 className="survey-question-text text-center">
           독자들은 이런 점을 좋아해요
         </h3>
-        <WordCloud words={positiveWords} options={options} />
+        {positiveSourceText === null || positiveSourceText === "" ? (
+          <h4>리뷰가 없습니다.</h4>
+        ) : (
+          <WordCloud words={positiveWords} options={options} />
+        )}
       </div>
       <div
         className="text-center justify-content-center"
@@ -72,7 +76,11 @@ export const WordCloudComponent = () => {
         <h3 className="survey-question-text text-center">
           독자들은 이런 점을 아쉬워해요
         </h3>
-        <WordCloud words={negativeWords} options={options} />
+        {negativeSourceText === null || negativeSourceText === "" ? (
+          <h4>리뷰가 없습니다.</h4>
+        ) : (
+          <WordCloud words={negativeWords} options={options} />
+        )}
       </div>
     </div>
   );
