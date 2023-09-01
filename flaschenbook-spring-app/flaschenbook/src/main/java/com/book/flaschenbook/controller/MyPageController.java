@@ -16,19 +16,16 @@ import java.util.List;
 @RequestMapping("/my-page")
 public class MyPageController {
     private final MyPageService myPageService;
-    private final ModelMapper modelMapper;
 
-    public MyPageController(MyPageService myPageService, ModelMapper modelMapper) {
+    public MyPageController(MyPageService myPageService) {
         this.myPageService = myPageService;
-        this.modelMapper = modelMapper;
     }
 
     @GetMapping("/today-book")
     public ResponseEntity<BookDetailDTO> getTodayBook(@RequestParam int userId) {
         BookModel bookModel = myPageService.getTodayBook(userId);
-        BookDetailDTO
-
-        return ResponseEntity.ok(bookModel);
+        BookDetailDTO todayBook = myPageService.getBookDetail(bookModel);
+        return ResponseEntity.ok(todayBook);
     }
 
     @GetMapping("/related-books")

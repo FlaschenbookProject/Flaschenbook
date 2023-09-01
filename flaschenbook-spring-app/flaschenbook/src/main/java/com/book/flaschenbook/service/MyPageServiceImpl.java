@@ -31,9 +31,10 @@ public class MyPageServiceImpl implements MyPageService{
     private final ModelMapper modelMapper;
     private final SurveySummaryRepository surveySummaryRepository;
     private final BookDetailRepository bookDetailRepository;
+    private final BookCategoryRepository bookCategoryRepository;
 
     @Autowired
-    public MyPageServiceImpl(SurveysRepository surveysRepository, SurveyDetailsRepository surveyDetailsRepository, BookInfoRepository bookInfoRepository, BookContentRepository bookContentRepository, RecommendedBooksRepository recommendedBooksRepository, ModelMapper modelMapper, SurveySummaryRepository surveySummaryRepository, BookDetailRepository bookDetailRepository) {
+    public MyPageServiceImpl(SurveysRepository surveysRepository, SurveyDetailsRepository surveyDetailsRepository, BookInfoRepository bookInfoRepository, BookContentRepository bookContentRepository, RecommendedBooksRepository recommendedBooksRepository, ModelMapper modelMapper, SurveySummaryRepository surveySummaryRepository, BookDetailRepository bookDetailRepository, BookCategoryRepository bookCategoryRepository) {
         this.surveysRepository = surveysRepository;
         this.surveyDetailsRepository = surveyDetailsRepository;
         this.bookInfoRepository = bookInfoRepository;
@@ -42,6 +43,7 @@ public class MyPageServiceImpl implements MyPageService{
         this.modelMapper = modelMapper;
         this.surveySummaryRepository = surveySummaryRepository;
         this.bookDetailRepository = bookDetailRepository;
+        this.bookCategoryRepository = bookCategoryRepository;
     }
     Date today = Date.valueOf(LocalDate.now());
 
@@ -79,9 +81,32 @@ public class MyPageServiceImpl implements MyPageService{
     @Override
     public BookDetailDTO getBookDetail(BookModel bookModel) {
         BookDetailDTO bookDetailDTO = modelMapper.map(bookModel, BookDetailDTO.class);
+        Optional<BookCategoryEntity> categoryEntity = bookCategoryRepository.findByCategoryId(bookModel.getCategoryId());
+        categoryEntity.ifPresent(bookCategoryEntity -> bookDetailDTO.setCategoryName(bookCategoryEntity.getCategoryName()));
+        Optional<BookDetailEntity> bookDetailEntityAL = bookDetailRepository.findById(new BookDetailIdEntity(bookDetailDTO.getIsbn(), "AL"));
+        Optional<BookDetailEntity> bookDetailEntityNA = bookDetailRepository.findById(new BookDetailIdEntity(bookDetailDTO.getIsbn(), "NA"));
+        Optional<BookDetailEntity> bookDetailEntityKK = bookDetailRepository.findById(new BookDetailIdEntity(bookDetailDTO.getIsbn(), "KK"));
 
+        bookDetailEntityAL.ifPresent(bookDetailEntity -> {
+            bookDetailDTO.setRanking(bookDetailEntityAL.get().getRanking());
+            bookDetailDTO.setAladinDescription(bookDetailEntityAL.get().getDescription());
+            bookDetailDTO.setAladinSaleUrl(bookDetailEntityAL.get().getSaleUrl());
+            bookDetailDTO.setAladinSalePrice(bookDetailEntityAL.get().getSalePrice());
+        });
 
-        return null;
+        bookDetailEntityNA.ifPresent(bookDetailEntity -> {
+            bookDetailDTO.setNaverDescription(bookDetailEntityNA.get().getDescription());
+            bookDetailDTO.setNaverSaleUrl(bookDetailEntityNA.get().getSaleUrl());
+            bookDetailDTO.setNaverSalePrice(bookDetailEntityNA.get().getSalePrice());
+       });
+
+        bookDetailEntityKK.ifPresent(bookDetailEntity -> {
+            bookDetailDTO.setKakaoDescription(bookDetailEntityKK.get().getDescription());
+            bookDetailDTO.setKakaoSaleUrl(bookDetailEntityKK.get().getSaleUrl());
+            bookDetailDTO.setKakaoSalePrice(bookDetailEntityKK.get().getSalePrice());
+        });
+
+        return bookDetailDTO;
     }
 
 
