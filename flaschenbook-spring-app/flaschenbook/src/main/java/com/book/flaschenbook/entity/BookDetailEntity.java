@@ -1,11 +1,13 @@
 package com.book.flaschenbook.entity;
 
 import jakarta.persistence.*;
+import lombok.ToString;
 import org.hibernate.annotations.Formula;
 import lombok.Data;
 
 @Entity
 @Data
+@ToString(exclude = {"bookInfo"})
 @Table(name = "BookDetail")
 public class BookDetailEntity {
 
