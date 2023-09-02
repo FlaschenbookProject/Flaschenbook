@@ -15,6 +15,7 @@ import Detail from "./components/BookDetail";
 import "font-awesome/css/font-awesome.min.css";
 import MainLogo from "./components/MainLogo";
 import Footer from "./components/Footer";
+import Dashboard from "./components/BookDashboard";
 
 function App() {
   const [isLogged, setIsLogged] = useState(false);
@@ -72,6 +73,7 @@ function App() {
               element={isLogged ? <MyPage /> : <Navigate to="/login" />}
             />
              <Route path="/detail/:isbn" element={<Detail />} /> 
+             <Route path="/dashboard" element={<Dashboard />} /> 
           </Routes>
           <Footer />
         </div>
