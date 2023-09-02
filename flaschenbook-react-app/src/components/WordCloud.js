@@ -21,8 +21,7 @@ const options = {
   rotations: 2,
   rotationAngles: [0, 90],
   fontSizes: [20, 60], // 이 부분을 조정하여 글자 크기를 변경
-  fontWeight: "bold",
-  fontFamily: "SCDream7",
+  fontFamily: "Bum",
 };
 
 export const WordCloudComponent = ({ isbn }) => {
@@ -50,12 +49,13 @@ export const WordCloudComponent = ({ isbn }) => {
   return (
     <div
       className="justify-content-center"
-      style={{ display: "flex", width: "100%", height: "400px" }}
+      style={{ display: "flex", width: "100%", height: "400px", justifyContent: "center"}}
     >
       <div
         className="text-center justify-content-center"
         style={{
           flex: 1,
+          border: "none",
         }}
       >
         <h3 className="survey-question-text text-center">
@@ -71,6 +71,7 @@ export const WordCloudComponent = ({ isbn }) => {
         className="text-center justify-content-center"
         style={{
           flex: 1,
+          border: "none",
         }}
       >
         <h3 className="survey-question-text text-center">
