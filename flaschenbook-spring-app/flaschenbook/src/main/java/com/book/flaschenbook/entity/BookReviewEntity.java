@@ -17,8 +17,7 @@ public class BookReviewEntity implements Serializable {
     private Integer reviewId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("isbn")
-    @JoinColumn(name = "isbn")
+    @JoinColumn(name = "isbn", insertable = false, updatable = false)
     private BookInfoEntity bookInfo;
 
     @Column(length = 700)

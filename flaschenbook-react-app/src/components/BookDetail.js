@@ -1,6 +1,7 @@
 import React, { Component, useEffect, useState } from 'react';
 import axios from 'axios';
 import '../css/Detail.css'; 
+import { WordCloudForDetail } from "./WordCloudForDetail";
 
 const BookDetail = ({ book, onClose }) => {
     const [bookDetail, setBookDetail] = useState({});
@@ -71,6 +72,12 @@ const BookDetail = ({ book, onClose }) => {
                     <p key={index}>{content}</p>
                     ))
                 )}
+             </div>
+             <div className="sale-site">
+                <div className='section-title'>
+                    <h2>독자들은 리뷰에서 이런 단어를 썼어요</h2>
+                </div>
+                <WordCloudForDetail isbn={isbn} />
              </div>
           </>
         ) : (

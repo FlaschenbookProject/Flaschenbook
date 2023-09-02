@@ -84,3 +84,8 @@
   font-family: 'SCDream3';
   color: white;
 }
+
+.custom-book {
+  color: #4169E1;
+  /* 다른 스타일 속성들 추가 */
+}

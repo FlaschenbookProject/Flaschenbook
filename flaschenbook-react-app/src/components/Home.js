@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import {
   MDBBtn,
   MDBModal,
@@ -15,6 +15,7 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import BookSliderItem from './BookSliderItem'; 
+import AppContext from "../context";
 import '../css/Logo.css'; // 전역 CSS 파일을 import
 import '../css/Font.css'; // Font.css 파일을 import
 import '../css/Main.css'; 
@@ -26,9 +27,17 @@ function MainPage() {
   const [bestSellers, setBestSellers] = useState([]);
   const [highRatingBooks, setHighRatingBooks] = useState([]);
   const [randomGenreBooks, setRandomGenreBooks] = useState([]);
+  const [recommendationGenreBooks, setRecommendationGenreBooks] = useState([]);
+  const [customRelatedBooks, setCustomRelatedBooks] = useState([]);
   const [firstGenre, setFirstGenre] = useState('');
+  const [customGenre, setCustomGenre] = useState('');
+  const [customBook, setCustomBook] = useState('');
   const [basicModal, setBasicModal] = useState(false);
   const hiddenBtnRef = useRef(null);
+  const { setIsLogged, isLogged } = useContext(AppContext);
+  const sessionInfo = JSON.parse(localStorage.getItem("sessionInfo"));
+  const userId = sessionInfo ? sessionInfo.userId : null;
+  const username = localStorage.getItem("username");
 
   const toggleShow = () => setBasicModal(!basicModal);
 
@@ -81,7 +90,47 @@ function MainPage() {
       .catch(error => {
         console.error('Error fetching genre books:', error);
       });
+    axios.get(`/api/books/rc_genre_books?userId=${userId}`)
+      .then(response => {
+        console.log('Received User genre books data:', response.data);
+        const customGenre = response.data[0].genre;
+        setRecommendationGenreBooks(response.data);
+        setCustomGenre(customGenre);
+      })
+      .catch(error => {
+        console.error('Error fetching User genre books:', error);
+      });
+ 
+      axios.get(`/api/books/rc_books?userId=${userId}`)
+      .then(response => {
+        console.log('Received User Related books data:', response.data);
+        const customBook = response.data[0].relatedBookTitle;
+        setCustomRelatedBooks(response.data);
+        setCustomBook(customBook);
+      })
+      .catch(error => {
+        console.error('Error fetching User Related books:', error);
+      });     
   }, []);
+
+  const handleLogout = () => {
+    const sessionInfo = JSON.parse(localStorage.getItem("sessionInfo"));
+    fetch("/api/users/logout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sessionInfo),
+    })
+      .then((response) => response.text())
+      .then((data) => {
+        console.log("Success:", data);
+        localStorage.removeItem("sessionInfo");
+        setIsLogged(false);
+        window.location.href = "/";
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
 
   // 슬라이더 설정
   const sliderSettings = {
@@ -118,9 +167,43 @@ function MainPage() {
     </div>
   ));
 
+  const randomUserGenreSliderImages = recommendationGenreBooks.map((book, index) => (
+    <div key={index} onClick={() => openModal(book)}>
+      <BookSliderItem key={index} book={book} />
+    </div>
+  ));
+ 
+  const randomCustomRelatedBookSliderImages = customRelatedBooks.map((book, index) => (
+    <div key={index} onClick={() => openModal(book)}>
+      <BookSliderItem key={index} book={book} />
+    </div>
+  ));
+
   return (
     <div className="main-page">
       <main>
+      {userId && isLogged && (
+        <>
+          <section className="book-section">
+            <h1 className="book-section-title">{username} 님을 위한 #{customGenre} 책</h1>
+            <div className="book-slider-container">
+              <Slider {...sliderSettings}>
+                {randomUserGenreSliderImages}
+              </Slider>
+            </div>
+          </section>
+          <section className="book-section">
+            <h1 className="book-section-title">
+              {customBook} 유사한 책
+            </h1>
+            <div className="book-slider-container">
+              <Slider {...sliderSettings}>
+                {randomCustomRelatedBookSliderImages}
+              </Slider>
+            </div>
+          </section>
+        </>
+      )}
         <section className="book-section">
           <h1 className="book-section-title">이번 주 베스트셀러</h1>
           <div className="book-slider-container">
@@ -137,24 +220,26 @@ function MainPage() {
             </Slider>
           </div>
         </section>
-        <section className="book-section">
-          <h1 className="book-section-title">독자들이 선택한 책</h1>
-          <div className="book-slider-container">
-            <Slider {...sliderSettings}>
-              {highRatingSliderImages}
-            </Slider>
-          </div>
-        </section>
-        <section className="book-section">
-          <h1 className="book-section-title">#오늘의 책 #{firstGenre}</h1>
-          <div className="book-slider-container">
-            <Slider {...sliderSettings}>
-              {randomGenreSliderImages}
-            </Slider>
-          </div>
-        </section>
-        <section className="book-section">
-
+        {!isLogged && (
+              <>
+              <section className="book-section">
+                <h1 className="book-section-title">독자들이 선택한 책</h1>
+                <div className="book-slider-container">
+                  <Slider {...sliderSettings}>
+                    {highRatingSliderImages}
+                  </Slider>
+                </div>
+              </section>
+              <section className="book-section">
+                <h1 className="book-section-title">#오늘의 책 #{firstGenre}</h1>
+                <div className="book-slider-container">
+                  <Slider {...sliderSettings}>
+                    {randomGenreSliderImages}
+                  </Slider>
+                </div>
+              </section>
+              </>
+            )}
         <MDBBtn ref={hiddenBtnRef} style={{ display: 'none' }} onClick={toggleShow}>LAUNCH DEMO MODAL</MDBBtn>
         <MDBModal show={basicModal} setShow={setBasicModal} tabIndex="-1" dialogClassName="modal-dialog-centered" >
         <MDBModalDialog>
@@ -168,7 +253,6 @@ function MainPage() {
           </MDBModalContent>
         </MDBModalDialog>
       </MDBModal>
-      </section>
       </main>
     </div>
   );

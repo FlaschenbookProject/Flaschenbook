@@ -26,4 +26,7 @@ public class BookModel {
     private String saleStatus;
 
     private String genre;
+
+    //개인 추천 서비스에서만 사용
+    private String relatedBookTitle;
 }

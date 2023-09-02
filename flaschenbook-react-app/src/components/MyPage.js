@@ -3,7 +3,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import "../css/Font.css"; // Font.css 파일을 import
 import "../css/Survey.css";
+import "../css/Main.css"
 import { WordCloudComponent } from "./WordCloud";
+import BookSliderItem from './BookSliderItem'; 
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 function MyPage() {
   const [todayBook, setTodayBook] = useState([]);
@@ -46,6 +51,23 @@ function MyPage() {
     fetchData();
   }, [userId]);
 
+  const sliderSettings = {
+    dots: false,
+    infinite: false,
+    speed: 500,
+    slidesToShow: 5,
+    slidesToScroll: 3,
+    initialSlide: 0,
+    arrows: false
+  };
+
+
+
+  const recommendationbookSlider = relatedBooks.map((book, index) => (
+      <BookSliderItem key={index} book={book} />
+  ));
+
+
   return (
     <div className="container">
       <div className="row">
@@ -84,38 +106,30 @@ function MyPage() {
             <h4>책 줄거리</h4>
             <p>{todayBook.kakaoDescription}</p>
             {/* <h4>구매링크</h4>
-          <p>
-            <a href="#">here</a>.
-          </p> */}
+            <p>
+              <a href="#">here</a>.
+            </p> */}
           </div>
         </div>
       </div>
-      <hr style={{ borderTop: "3px solid #bbb" }} />
-      <div className="container">
+      <hr className="mt-3" style={{ display: "none" }} />
+      <div className="container" style={{ marginTop: "80px" }}>
         <WordCloudComponent isbn={todayBook.isbn} />
       </div>
-      <hr style={{ borderTop: "3px solid #bbb" }} />
-      <div className="row mt-5">
-        <div className="col-md-12">
+      <hr style={{ display: "none"  }} />
+      <div className="row mt-5" style={{ marginTop: "80px" }}>
+        <div className="col-md-12 text-center">
           <h3 className="survey-question-text">
             "{username}" 님 이런 도서도 있어요
           </h3>
-          <div style={{ whiteSpace: "nowrap", overflowX: "auto" }}>
-            {relatedBooks.map((book, index) => (
-              <div
-                style={{ display: "inline-block", margin: "10px" }}
-                key={index}
-              >
-                <img
-                  src={book.imageUrl}
-                  className="img-fluid"
-                  alt={book.title}
-                  style={{ maxWidth: "200px", maxHeight: "300px" }}
-                />
-              </div>
-            ))}
-          </div>
         </div>
+        <section className="book-section mt-3">
+          <div className="book-slider-container">
+            <Slider {...sliderSettings}>
+              {recommendationbookSlider}
+            </Slider>
+          </div>
+        </section>
       </div>
     </div>
   );
