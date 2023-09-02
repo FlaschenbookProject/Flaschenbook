@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 function BookSliderItem(props) {
   const { book } = props;
   const [isHovered, setIsHovered] = useState(false);
-  const [basicModal, setBasicModal] = useState(false);
   const handleMouseEnter = () => {
     setIsHovered(true);
   };
@@ -23,8 +22,8 @@ function BookSliderItem(props) {
       <img src={book.imageUrl} alt={book.title} className="book-image" />
       {isHovered && (
         <div className="book-info">
-          <h4>{book.title}</h4>
-          <p>{book.author}</p>
+          <h4 className="book-hover-title">{book.title}</h4>
+          <p className="book-description">{book.author}</p>
           <p className="book-description">{book.description}</p>
         </div>
       )}

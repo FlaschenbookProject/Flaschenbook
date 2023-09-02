@@ -76,4 +76,11 @@
   -webkit-box-orient: vertical;
   white-space: normal; /* 줄 바꿈 허용 */
   font-family: 'SCDream2';
+  padding: "10px";
+  color: white;
+}
+
+.book-hover-title{
+  font-family: 'SCDream3';
+  color: white;
 }
