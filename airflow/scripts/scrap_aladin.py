@@ -3,17 +3,13 @@ from playwright.sync_api import sync_playwright
 from utils.api_operations import get_isbn_list
 from dotenv import load_dotenv
 import s3fs
+import sys
 import pandas as pd
 import nest_asyncio
 nest_asyncio.apply()
 
 
-DATE = "2023-08-19"
-WEBCODE = "AL"
-BOOK_TYPE = "best"
-
-
-def scrap_review(isbn_list, bucket_name):
+def scrap_review(isbn_list, bucket_name, DATE, WEBCODE, BOOK_TYPE):
     reviews = []
 
     with sync_playwright() as p:
@@ -134,7 +130,7 @@ def scrap_review(isbn_list, bucket_name):
                             else:
                                 rating += 2
 
-                        review_dict = {'isbn': isbn, 'web_code': WEBCODE, 'content': review_text, 'rating': float(rating), 'wrt_date': date}
+                        review_dict = {'isbn': isbn, 'web_code': WEBCODE, 'content': review_text, 'rating': str(rating), 'wrt_date': date}
                         reviews_one_book.append(review_dict)
 
                         print("리뷰:", review_text)
@@ -167,7 +163,7 @@ def scrap_review(isbn_list, bucket_name):
         browser.close()
 
 
-def upload_to_s3(bucket_name, reviews, num):
+def upload_to_s3(bucket_name, reviews, num, DATE, WEBCODE, BOOK_TYPE):
     df = pd.DataFrame(reviews)
     fs = s3fs.S3FileSystem(anon=False)
     bucket_path = f"s3://{bucket_name}/curated/review/{DATE}/{BOOK_TYPE}_book_reviews_{WEBCODE}_{num}.parquet"
@@ -180,9 +176,23 @@ def upload_to_s3(bucket_name, reviews, num):
 def main():
     load_dotenv()
     bucket_name = os.environ.get("BUCKET_NAME")
+    if len(sys.argv) < 2:
+        sys.exit(1)
+
+    print(sys.argv)
+
+    DATE = sys.argv[1]
+    WEBCODE = sys.argv[2]
+    BOOK_TYPE = sys.argv[3]
+
+    print(WEBCODE, DATE)
+
     isbn_object_key = f"raw/isbn/{DATE}/{BOOK_TYPE}.csv"
     isbn_list = get_isbn_list(bucket_name, isbn_object_key)
-    scrap_review(isbn_list, bucket_name)
+    if len(isbn_list) == 0:
+        print(f"{isbn_object_key}의 파일이 존재하지 않습니다.")
+        return
+    scrap_review(isbn_list, bucket_name, DATE, WEBCODE, BOOK_TYPE)
 
 
 if __name__ == "__main__":

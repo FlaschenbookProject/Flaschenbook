@@ -5,15 +5,12 @@ import pandas as pd
 import os
 import re
 from playwright.sync_api import sync_playwright
+import sys
 import nest_asyncio
 nest_asyncio.apply()
 
-DATE = "2023-08-19"
-WEBCODE = "KB"
-BOOK_TYPE = "best"
 
-
-def scrap_review_and_content(isbn_list):
+def scrap_review_and_content(isbn_list, WEBCODE):
     reviews = []
     contents = []
 
@@ -135,7 +132,7 @@ def scrap_review_and_content(isbn_list):
                         wrt_date_xpath).inner_text().replace(".", "-")
 
                     review.update({'isbn': isbn, 'web_code': WEBCODE,
-                                  'content': content, 'rating': float(rating), 'wrt_date': wrt_date})
+                                  'content': content, 'rating': rating, 'wrt_date': wrt_date})
                     # 결과 출력
                     print(f"review {review_cnt}번째")
                     print(f"rating: {rating}")
@@ -161,7 +158,7 @@ def scrap_review_and_content(isbn_list):
     return reviews, contents
 
 
-def upload_to_s3(bucket_name, data, type):
+def upload_to_s3(bucket_name, data, type, DATE, WEBCODE, BOOK_TYPE):
     df = pd.DataFrame(data)
     fs = s3fs.S3FileSystem(anon=False)
     if type == "review":
@@ -176,10 +173,22 @@ def upload_to_s3(bucket_name, data, type):
 
 def main():
     load_dotenv()
+    if len(sys.argv) < 2:
+        sys.exit(1)
+
+    print(sys.argv)
+    DATE = sys.argv[1]
+    WEBCODE = sys.argv[2]
+    BOOK_TYPE = sys.argv[3]
+    print(WEBCODE, DATE)
+
     bucket_name = os.environ.get("BUCKET_NAME")
     isbn_object_key = f"raw/isbn/{DATE}/{BOOK_TYPE}.csv"
     isbn_list = get_isbn_list(bucket_name, isbn_object_key)
-    reviews, contents = scrap_review_and_content(isbn_list)
+    if len(isbn_list) == 0:
+        print(f"{isbn_object_key}의 파일이 존재하지 않습니다.")
+        return
+    reviews, contents = scrap_review_and_content(isbn_list, WEBCODE)
     upload_to_s3(bucket_name, reviews, "review")
     upload_to_s3(bucket_name, contents, "content")
 

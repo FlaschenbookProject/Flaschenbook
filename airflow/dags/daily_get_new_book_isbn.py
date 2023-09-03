@@ -4,7 +4,7 @@ from airflow import DAG
 from airflow.providers.docker.operators.docker import DockerOperator
 from airflow.operators.python import PythonOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
-from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
+# from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
 from airflow.models import Variable
 import os
 
@@ -72,16 +72,19 @@ with DAG(
         command=["python", "get_api_new_isbn.py", date]
     )
 
-    check_file_exists = S3KeySensor(
-        task_id='check_file_exists',
-        bucket_key=f's3://{bucket_name}/{object_key}',
-        aws_conn_id='aws_conn_id',
-        timeout=18 * 60 * 60,
-        poke_interval=10 * 60,
-        dag=dag
-    )
+    # check_file_exists = S3KeySensor(
+    #     task_id='check_file_exists',
+    #     bucket_key=f's3://{bucket_name}/{object_key}',
+    #     aws_conn_id='aws_conn_id',
+    #     timeout=18 * 60 * 60,
+    #     poke_interval=10 * 60,
+    #     mode='poke',
+    #     poke_while_false=False,
+    #     timeout_mode='poke',
+    #     dag=dag
+    # )
 
-    check_file_exists.log.info(f'Checking for file: {f"s3://{bucket_name}/{object_key}"}')
+    # check_file_exists.log.info(f'Checking for file: {f"s3://{bucket_name}/{object_key}"}')
 
     # 'daily_fetch_new_book_naver' DAG 트리거
     trigger_naver_dag = TriggerDagRunOperator(
@@ -104,4 +107,16 @@ with DAG(
         dag=dag,
     )
 
-    get_execution_date >> get_isbn_data >> check_file_exists >> [trigger_naver_dag, trigger_kakao_dag, trigger_aladin_dag]
+    trigger_aladin_review_dag = TriggerDagRunOperator(
+        task_id='trigger_get_review_content_new_book_aladin',
+        trigger_dag_id='get_review_content_new_book_aladin',
+        dag=dag,
+    )
+
+    trigger_kyobo_review_dag = TriggerDagRunOperator(
+        task_id='trigger_get_review_content_new_book_kyobo',
+        trigger_dag_id='get_review_content_new_book_kyobo',
+        dag=dag,
+    )
+
+    get_execution_date >> get_isbn_data >> [trigger_naver_dag, trigger_kakao_dag, trigger_aladin_dag, trigger_aladin_review_dag, trigger_kyobo_review_dag]
