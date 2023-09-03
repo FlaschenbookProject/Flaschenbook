@@ -50,12 +50,12 @@ export const WordCloudForDetail = ({ isbn }) => {
   return (
     <div
       className="justify-content-center"
-      style={{ display: "flex", width: "100%", height: "400px",  backgroundColor: "#5AB2FF", padding: "20px"}}
+      style={{ display: "flex", width: "100%", height: "400px",  backgroundColor: "#5AB2FF", padding: "70px"}}
     >
         {SourceText === null || SourceText === "" ? (
           <h4>리뷰가 없습니다.</h4>
         ) : (
-          <WordCloud words={Words} options={options} maxWords={60}/>
+          <WordCloud words={Words} options={options} maxWords={50}/>
         )}
     </div>
   );
