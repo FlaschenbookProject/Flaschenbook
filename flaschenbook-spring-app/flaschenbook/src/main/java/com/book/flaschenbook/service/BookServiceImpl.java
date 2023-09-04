@@ -104,12 +104,14 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     public List<BookModel> getBestSellers(){
         String sql ="""
-                        SELECT a.*
-                        FROM BookInfo a
-                        JOIN BookDetail b ON a.isbn = b.isbn
-                        WHERE ranking LIKE '종합%'
-                        AND webCode = 'AL'
-                    """;
+                    SELECT a.*
+                    FROM BookInfo a
+                    JOIN BookDetail b ON a.isbn = b.isbn
+                    WHERE ranking LIKE '종합%'
+                    AND webCode = 'AL'
+                    ORDER BY CONVERT(REGEXP_REPLACE(b.ranking, '[^0-9]+', ''), UNSIGNED)
+                    LIMIT 10
+                """;
 
         @SuppressWarnings("unchecked")
         List<BookInfoEntity> books = entityManager.createNativeQuery(sql, BookInfoEntity.class).getResultList();
