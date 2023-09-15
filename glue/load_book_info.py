@@ -3,8 +3,9 @@ from awsglue.transforms import *
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from awsglue.context import GlueContext
-from awsglue.dynamicframe import DynamicFrame
 from awsglue.job import Job
+from pyspark.sql import SparkSession
+from awsglue.dynamicframe import DynamicFrame
 
 # @params: [JOB_NAME]
 args = getResolvedOptions(sys.argv, ['JOB_NAME'])
@@ -14,34 +15,68 @@ glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
+
 mappings = [("ISBN", "string", "isbn", "string"),
             ("TITLE", "string", "title", "string"),
-            ("CATEGORY_ID", "string", "categoryId", "decimal"),
+            ("CATEGORY_ID", "bigint", "categoryId", "int"),
             ("AUTHOR", "string", "author", "string"),
             ("TRANSLATOR", "string", "translator", "string"),
             ("PUBLISHER", "string", "publisher", "string"),
             ("PUBDATE", "string", "pubDate", "timestamp"),
-            ("PRICE", "string", "price", "decimal"),
-            ("PAGE_CNT", "string", "pageCnt", "decimal"),
+            ("PRICE", "bigint", "price", "decimal(10,0)"),
+            ("PAGE_CNT", "bigint", "pageCnt", "int"),
             ("IMAGE_URL", "string", "imageUrl", "string")
             ]
-datasource0 = glueContext.create_dynamic_frame.from_catalog(
-    database="flaschenbook-data-catalog-db", table_name="book_info", transformation_ctx="datasource0")
-applymapping1 = ApplyMapping.apply(
-    frame=datasource0, mappings=mappings, transformation_ctx="applymapping1")
+
+# Load data from RDS DB
+prod_db_df = spark.read.jdbc(
+    url="jdbc:mysql://db-endpoint:3306/database-name",
+    table="BookDetail",
+    properties={
+        "user": "username",
+        "password": "password"
+    }
+)
+
+
+# Load data from glue catalog
+catalog_dyf = glueContext.create_dynamic_frame.from_catalog(
+    database="flaschenbook-data-catalog-db",
+    table_name="book_info",
+    transformation_ctx="catalog_dyf"
+)
+
+mapped_catalog_dyf = ApplyMapping.apply(
+    frame=catalog_dyf,
+    mappings=mappings
+)
 
 # DynamicFrame을 DataFrame으로 변환
-dataframe = applymapping1.toDF()
+dataframe = mapped_catalog_dyf.toDF()
+dataframe_without_duplicates = dataframe.dropDuplicates(['isbn'])
 
-# DataFrame에서 중복된 ISBN 제거
-deduplicated_df = dataframe.dropDuplicates(['ISBN'])
+# Select only the ISBNs from the prod_db
+prod_db_isbns = prod_db_df.select('isbn')
 
-# DataFrame을 DynamicFrame으로 다시 변환
-deduplicated = DynamicFrame.fromDF(
-    deduplicated_df, glueContext, "deduplicated")
+# Remove the rows with ISBNs that are already in the prod_db
+new_data = dataframe_without_duplicates.join(
+    prod_db_isbns, ['isbn'], 'left_anti')
 
-# deduplicated를 데이터베이스에 쓰기
-datasink2 = glueContext.write_dynamic_frame.from_jdbc_conf(frame=deduplicated, catalog_connection="flb-service-db-conn", connection_options={
-                                                           "dbtable": "BookInfo", "database": "dev"}, transformation_ctx="datasink2")
+# Convert back to DynamicFrame
+new_dyf = DynamicFrame.fromDF(new_data, glueContext, "new_dyf")
+
+# Write the results
+prod_datasink = glueContext.write_dynamic_frame.from_jdbc_conf(
+    frame=new_dyf,
+    catalog_connection="flb-service-db-conn",
+    connection_options={"dbtable": "BookInfo",
+                        "database": "dev", "overwrite": "true"},
+    transformation_ctx="prod_datasink")
+
+dev_datasink = glueContext.write_dynamic_frame.from_jdbc_conf(
+    frame=new_dyf,
+    catalog_connection="flb-service-public-db-conn",
+    connection_options={"dbtable": "BookInfo", "database": "dev"},
+    transformation_ctx="dev_datasink")
 
 job.commit()
