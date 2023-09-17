@@ -11,22 +11,28 @@ def lambda_handler(event, context):
         bucket = event['Records'][0]['s3']['bucket']['name']
         cleaned_key = event['Records'][0]['s3']['object']['key']
 
-        if re.match(r'cleaned/book_info/.*/\d{4}-\d{2}-\d{2}/.*.parquet', cleaned_key):
+        if re.match(r'cleaned/book_info/.*/\d{4}-\d{2}-\d{2}/init/.*.parquet', cleaned_key):
             date = cleaned_key.split('/')[3]
             book_type = cleaned_key.split('/')[4].replace(".parquet", "")
+            book_type = 'init'
+            book_num = cleaned_key.split(
+                '/')[-1].split('init/')[-1].replace('.parquet', '')
+
             keys = [
-                f'cleaned/book_info/naver/{date}/{book_type}.parquet',
-                f'cleaned/book_info/kakao/{date}/{book_type}.parquet',
-                f'cleaned/book_info/aladin/{date}/{book_type}.parquet',
+                f'cleaned/book_info/naver/{date}/{book_type}/{book_num}.parquet',
+                f'cleaned/book_info/kakao/{date}/{book_type}/{book_num}.parquet',
+                f'cleaned/book_info/aladin/{date}/{book_type}/{book_num}.parquet',
             ]
-            book_info_key = f'curated/book_info/{date}/book_info.parquet'
-            book_detail_key = f'curated/book_detail/{date}/book_detail.parquet'
+            book_info_key = f'curated/book_info/{date}_{book_type}_{book_num}.parquet'
+            book_detail_key = f'curated/book_detail/{date}_{book_type}_{book_num}.parquet'
 
             # S3에서 parquet 파일 읽기
             def read_parquet_from_s3(bucket, key):
                 try:
                     response = s3.get_object(Bucket=bucket, Key=key)
                     data = response['Body'].read()
+                    print(key)
+                    print(data[1:10])
                     return pd.read_parquet(BytesIO(data))
                 except s3.exceptions.NoSuchKey:
                     return None
@@ -40,11 +46,22 @@ def lambda_handler(event, context):
                     'body': 'One or more files do not exist!'
                 }
 
+            print("df 정의")
             # df 정의
             df_naver = dfs[0]
             df_kakao = dfs[1]
             df_aladin = dfs[2]
+            print(len(df_naver))
+            print(len(df_kakao))
+            print(len(df_aladin))
 
+            if any(df is None or df.empty for df in dfs):
+                return {
+                    'statusCode': 400,
+                    'body': 'One or more files do not exist!'
+                }
+
+            print("book_info 생성")
             # 1. book_info 생성
             # 데이터 프레임에서 필요한 정보 선택
             df_naver_selected = df_naver[['ISBN', 'IMAGE_URL']]
@@ -52,9 +69,11 @@ def lambda_handler(event, context):
             df_aladin_selected = df_aladin[[
                 'ISBN', 'TITLE', 'CATEGORY_ID', 'PUBLISHER', 'PUBDATE', 'PRICE', 'PAGE_CNT']]
 
+            print("선택된 열들로 새로운 데이터프레임 생성")
             # 선택된 열들로 새로운 데이터프레임 생성
             df_selected = pd.merge(pd.merge(
                 df_naver_selected, df_kakao_selected, on='ISBN'), df_aladin_selected, on='ISBN')
+            print(f'{len(df_selected)} 개 ')
 
             # parquet 파일로 변환
             parquet_buffer = BytesIO()
