@@ -1,6 +1,4 @@
-variable "aws_region" {
-  default = "ap-northeast-2"
-}
+variable "aws_region" {}
 
 variable "environment" {
   default = "flaschenbook"
@@ -22,3 +20,13 @@ variable "private_subnets_cidr" {
   default     = ["10.0.16.0/20", "10.0.144.0/20"]
   description = "CIDR block for Private Subnet"
 }
+
+variable "bucket_name" {}
+
+variable "db_username" {}
+
+variable "db_password" {}
+
+variable "db_conn_url" {}
+
+variable "key_name" {}
