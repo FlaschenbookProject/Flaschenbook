@@ -22,6 +22,13 @@ resource "aws_security_group" "mysql-sg" {
     protocol        = "tcp"
     security_groups = ["${aws_security_group.glue_sg.id}"]
   }
+  # Bastion Host의 보안 그룹을 사용하여 MySQL(예: 3306 포트) 접근을 허용
+  ingress {
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.bastion_host_sg.id]
+  }
 
   egress {
     from_port   = 0
