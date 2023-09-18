@@ -30,3 +30,5 @@ variable "db_password" {}
 variable "db_conn_url" {}
 
 variable "key_name" {}
+
+variable "root_directory" {}
