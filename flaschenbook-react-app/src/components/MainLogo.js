@@ -56,9 +56,6 @@ function MainLogo() {
             <Link to="/my-page" className="link-style">
               날 위한 서재
             </Link>
-            <Link to="/dashboard" className="link-style">
-              모두의 서재
-            </Link>
           </>
         ) : (
           <>
@@ -67,9 +64,6 @@ function MainLogo() {
             </Link>
             <Link to="/login" className="link-style">
               로그인
-            </Link>
-            <Link to="/dashboard" className="link-style">
-              모두의 서재
             </Link>
           </>
         )}
