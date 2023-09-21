@@ -32,7 +32,8 @@ resource "aws_iam_policy" "ecr_policy" {
           "ecr:UploadLayerPart",
           "ecr:CompleteLayerUpload",
           "ecr:GetAuthorizationToken",
-          "ecr:CreateRepository"
+          "ecr:CreateRepository",
+          "codebuild:BatchGetBuilds"
         ],
         Effect   = "Allow",
         Resource = "*"
@@ -77,8 +78,11 @@ resource "aws_iam_policy" "codebuild_startbuild_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Effect   = "Allow",
-        Action   = "codebuild:StartBuild",
+        Effect = "Allow",
+        Action = [
+          "codebuild:StartBuild",
+          "codebuild:BatchGetBuilds"
+        ]
         Resource = "*"
       }
     ]
