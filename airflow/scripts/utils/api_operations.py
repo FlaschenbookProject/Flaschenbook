@@ -21,7 +21,7 @@ def get_isbn_list(bucket_name: str, object_key: str) -> List[str]:
         list: ISBN 목록
     """
     s3_client = get_s3_client()
-    
+
     try:
         response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
         csv_content = response['Body'].read().decode('utf-8')

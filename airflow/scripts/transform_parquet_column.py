@@ -1,5 +1,4 @@
 import boto3
-import pandas as pd
 import pyarrow.parquet as pq
 from io import BytesIO
 import os

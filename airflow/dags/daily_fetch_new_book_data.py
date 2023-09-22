@@ -68,7 +68,7 @@ def create_fetch_new_book_dag(site):
         #     timeout_mode='poke'
         # )
 
-        execution_date_task >> fetch_api_data 
+        execution_date_task >> fetch_api_data
 
     return dag
 
