@@ -51,8 +51,12 @@ resource "aws_codebuild_project" "flb-frontend-codebuild" {
           commands:
             - echo "Pushing the Docker image..."
             - docker push $REPOSITORY_URI:latest
-            - echo '[{"name":"$CONTAINER_NAME","imageUri":"'$REPOSITORY_URI:latest'"}]' > imagedefinitions.json
-            - mv imagedefinitions.json /codebuild/output/
+            - echo '[{"name":"'$CONTAINER_NAME'","imageUri":"'$REPOSITORY_URI:latest'"}]' > imagedefinitions.json
+            - cat imagedefinitions.json
+            - ls -l
+      artifacts:
+        files: 
+          - imagedefinitions.json
     EOT
   }
 }

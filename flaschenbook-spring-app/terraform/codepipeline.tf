@@ -16,7 +16,7 @@ resource "aws_codepipeline" "flb-frontend-pipeline" {
       owner            = "AWS"
       provider         = "CodeStarSourceConnection"
       version          = "1"
-      output_artifacts = ["source_output"]
+      output_artifacts = ["source_out"]
 
       configuration = {
         ConnectionArn    = "${aws_codestarconnections_connection.flb-github-connection.arn}"
@@ -34,8 +34,8 @@ resource "aws_codepipeline" "flb-frontend-pipeline" {
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
-      input_artifacts  = ["source_output"]
-      output_artifacts = ["build_output"]
+      input_artifacts  = ["source_out"]
+      output_artifacts = ["build_out"]
       version          = "1"
 
       configuration = {
@@ -44,22 +44,21 @@ resource "aws_codepipeline" "flb-frontend-pipeline" {
     }
   }
 
-  # stage {
-  #   name = "Deploy"
+  stage {
+    name = "Deploy"
 
-  #   action {
-  #     name            = "DeployAction"
-  #     category        = "Deploy"
-  #     owner           = "AWS"
-  #     provider        = "CodeDeployToECS"
-  #     input_artifacts = ["build_output"]
-  #     version         = "1"
-
-  #     configuration = {
-  #       ApplicationName     = "${aws_codedeploy_app.flb-frontend-codedeploy.name}"
-  #       DeploymentGroupName = "${aws_codedeploy_deployment_group.flb-frontend-dg.deployment_group_name}"
-  #       FileName            = "imagedefinitions.json"
-  #     }
-  #   }
-  # }
+    action {
+      name            = "DeployAction"
+      category        = "Deploy"
+      owner           = "AWS"
+      provider        = "ECS"
+      input_artifacts = ["build_out"]
+      version         = "1"
+      configuration = {
+        ClusterName = aws_ecs_cluster.flb-ecs-cluster.name
+        ServiceName = aws_ecs_service.flb-frontend-service.name
+        FileName    = "imagedefinitions.json"
+      }
+    }
+  }
 }

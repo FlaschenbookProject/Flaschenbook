@@ -126,6 +126,14 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_policy_attachment" {
   role       = aws_iam_role.flb-codepipeline_role.name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchFullAccess"
 }
+resource "aws_iam_role_policy_attachment" "codedeploy_policy_attachment" {
+  role       = aws_iam_role.flb-codepipeline_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSCodeDeployFullAccess"
+}
+resource "aws_iam_role_policy_attachment" "ecs_policy_attachment" {
+  role       = aws_iam_role.flb-codepipeline_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
+}
 
 resource "aws_iam_role" "flb-codedeploy_role" {
   name = "flb-codedeploy_role"
