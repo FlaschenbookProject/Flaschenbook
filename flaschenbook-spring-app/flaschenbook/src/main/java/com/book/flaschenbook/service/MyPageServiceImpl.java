@@ -202,9 +202,9 @@ public class MyPageServiceImpl implements MyPageService {
 
         for (BookReviewEntity review : reviews) {
             BigDecimal rating = review.getRating();
-            if (rating.compareTo(BigDecimal.valueOf(5)) >= 0) {
+            if (rating.compareTo(BigDecimal.valueOf(7)) >= 0) {
                 positiveReviews.add(review.getContent());
-            } else if (rating.compareTo(BigDecimal.valueOf(3)) <= 0) {
+            } else if (rating.compareTo(BigDecimal.valueOf(6)) <= 0) {
                 negativeReviews.add(review.getContent());
             }
         }

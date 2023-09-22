@@ -16,7 +16,7 @@ def lambda_handler(event, context):
         print(raw_key)
 
         # 키가 'raw/book_info/<날짜>/new.json' 패턴에 맞는지 확인
-        if re.match(r'raw/book_info/.*/\d{4}-\d{2}-\d{2}/.*.json', raw_key):
+        if re.match(r'raw/book_info/.*/\d{4}-\d{2}-\d{2}/init/.*.json', raw_key):
 
             # S3에서 raw 데이터 가져오기
             raw_object = s3.get_object(Bucket=bucket, Key=raw_key)

@@ -4,23 +4,17 @@ import com.book.flaschenbook.dto.BookDetailDTO;
 import com.book.flaschenbook.entity.*;
 import com.book.flaschenbook.model.BookModel;
 
-import com.book.flaschenbook.repository.BookCategoryRepository;
-import com.book.flaschenbook.repository.BookInfoRepository;
-import com.book.flaschenbook.repository.BookRepository;
-import com.book.flaschenbook.repository.CodeDetailRepository;
+import com.book.flaschenbook.repository.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.criteria.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -31,12 +25,18 @@ public class BookServiceImpl implements BookService {
     private final BookInfoRepository bookInfoRepository;
     private final CodeDetailRepository codeDetailRepository;
 
+    private final SurveySummaryRepository surveySummaryRepository;
+
     @Autowired
-    public BookServiceImpl(BookRepository bookRepository, BookCategoryRepository bookCategoryRepository, CodeDetailRepository codeDetailRepository, BookInfoRepository bookInfoRepository, ModelMapper modelMapper) {
+    public BookServiceImpl(BookRepository bookRepository, BookCategoryRepository bookCategoryRepository,
+                           CodeDetailRepository codeDetailRepository, BookInfoRepository bookInfoRepository,
+                           SurveySummaryRepository surveySummaryRepository,
+                           ModelMapper modelMapper) {
         this.bookRepository = bookRepository;
         this.bookCategoryRepository = bookCategoryRepository;
         this.codeDetailRepository = codeDetailRepository;
         this.bookInfoRepository = bookInfoRepository;
+        this.surveySummaryRepository = surveySummaryRepository;
         this.modelMapper = modelMapper;
     }
     private BookDetailDTO mapBookDetailEntityToDTO(BookDetailDTO books, List<BookDetailEntity> bookDetails) {
@@ -104,12 +104,14 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     public List<BookModel> getBestSellers(){
         String sql ="""
-                        SELECT a.*
-                        FROM BookInfo a
-                        JOIN BookDetail b ON a.isbn = b.isbn
-                        WHERE ranking LIKE '종합%'
-                        AND webCode = 'AL'
-                    """;
+                    SELECT a.*
+                    FROM BookInfo a
+                    JOIN BookDetail b ON a.isbn = b.isbn
+                    WHERE ranking LIKE '종합%'
+                    AND webCode = 'AL'
+                    ORDER BY CONVERT(REGEXP_REPLACE(b.ranking, '[^0-9]+', ''), UNSIGNED)
+                    LIMIT 10
+                """;
 
         @SuppressWarnings("unchecked")
         List<BookInfoEntity> books = entityManager.createNativeQuery(sql, BookInfoEntity.class).getResultList();
@@ -192,7 +194,6 @@ public class BookServiceImpl implements BookService {
             int randomIndex = random.nextInt(genreList.size());
             CodeDetailEntity genre = genreList.get(randomIndex);
             genreName = genre.getCodeName();
-            System.out.println(genre.getEtc1() + " 장르: " + genre.getCodeName());
 
             String sql ="WITH reviewCnt AS (" +
                     "           SELECT r.isbn" +
@@ -280,5 +281,142 @@ public class BookServiceImpl implements BookService {
         book.setBookContent(selectedContent);
 
         return book;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookModel> getRecommendationGenreBooks(Integer userId)
+    {
+        List<SurveySummaryEntity> surveySummaryEntites = surveySummaryRepository.findByTypeAndUserId("C", userId);
+        List<CodeDetailEntity> genreList = codeDetailRepository.findByCommonCode(2);
+
+        List<CodeDetailEntity> userGenreList = new ArrayList<>();
+        for (SurveySummaryEntity surveySummary: surveySummaryEntites)
+        {
+            String content = surveySummary.getContent();
+            for (CodeDetailEntity codeDetail : genreList) {
+                String codeName = codeDetail.getCodeName();
+
+                if (content.contains(codeName)) {
+                    userGenreList.add(codeDetail);
+                }
+            }
+        }
+
+        String genreName = "";
+        String columnName = "";
+
+        Random random = new Random();
+        List<BookInfoEntity> books = new ArrayList<>();
+        while (books.isEmpty()) {
+            System.out.println(userGenreList);
+            if(userGenreList.isEmpty())
+            {
+                int randomIndex = random.nextInt(surveySummaryEntites.size());
+                SurveySummaryEntity genre = surveySummaryEntites.get(randomIndex);
+                genreName = genre.getContent();
+                columnName = "depth2";
+            }
+            else
+            {
+                int randomIndex = random.nextInt(userGenreList.size());
+                CodeDetailEntity genre = userGenreList.get(randomIndex);
+                genreName = genre.getCodeName();
+                columnName = genre.getEtc1();
+            }
+            System.out.println(genreName + "/" + columnName);
+
+            String sql ="WITH reviewCnt AS (" +
+                    "           SELECT r.isbn" +
+                    "                , count(r.reviewId) totalReviewCnt"+
+                    "             FROM BookReview r" +
+                    "         GROUP BY 1)" +
+                    " SELECT a.*" +
+                    "  FROM BookInfo a" +
+                    " JOIN BookCategory b" +
+                    "   ON a.categoryId = b.categoryId" +
+                    " JOIN reviewCnt c" +
+                    "    ON a.isbn = c.isbn" +
+                    " WHERE b." + columnName + " LIKE '%" + genreName + "%'" +
+                    "   AND a.categoryId IN (SELECT code" +
+                    "						  FROM CodeDetail" +
+                    "						 WHERE commonCode = 1)" +
+                    " ORDER BY totalReviewCnt DESC" +
+                    " LIMIT 10";
+
+            @SuppressWarnings("unchecked")
+            List<BookInfoEntity> result = entityManager.createNativeQuery(sql, BookInfoEntity.class).getResultList();
+            books = result;
+        }
+
+
+        List<BookModel> userGenreBooks = new ArrayList<>();
+        for (BookInfoEntity bookInfo : books) {
+            BookModel book = modelMapper.map(bookInfo, BookModel.class);
+            for (BookDetailEntity bookDetail : bookInfo.getBookDetails()) {
+                if ("AL".equals(bookDetail.getId().getWebCode())) {
+                    book.setDescription(bookDetail.getDescription());
+                    break;
+                }
+            }
+            book.setGenre(genreName);
+            userGenreBooks.add(book);
+        }
+
+        return userGenreBooks;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookModel> getRelatedCustomBook(Integer userId)
+    {
+        List<SurveySummaryEntity> surveySummaryEntites = surveySummaryRepository.findByTypeAndUserId("S", userId);
+        surveySummaryEntites.addAll(surveySummaryRepository.findByTypeAndUserId("T", userId));
+
+        Random random = new Random();
+        int randomIndex = random.nextInt(surveySummaryEntites.size());
+        SurveySummaryEntity randomCustomBook = surveySummaryEntites.get(randomIndex);
+
+        BookInfoEntity customBook = bookInfoRepository.findByIsbn(randomCustomBook.getContentId());
+
+        String sql = "WITH MainBook AS ( " +
+            "   SELECT book.categoryId category, " +
+            "          cate.categoryName categoryName, " +
+            "          cate.depth3 depth3, " +
+            "          book.author auth, " +
+            "          book.isbn " +
+            "   FROM BookCategory cate " +
+            "   JOIN BookInfo book ON book.categoryId = cate.categoryId " +
+            "   WHERE isbn = " + customBook.getIsbn() +
+            ") " +
+            "SELECT a.* " +
+            "FROM BookInfo a " +
+            "JOIN MainBook b " +
+            "WHERE a.categoryId IN ( " +
+            "   SELECT c.categoryId " +
+            "   FROM BookCategory c " +
+            "   WHERE c.depth3 LIKE b.depth3 " +
+            ") " +
+            "OR a.author = b.auth " +
+            "LIMIT 15";
+
+        @SuppressWarnings("unchecked")
+        List<BookInfoEntity> result = entityManager.createNativeQuery(sql, BookInfoEntity.class).getResultList();
+        List<BookInfoEntity> books = result;
+
+        List<BookModel> userReleatedBooks = new ArrayList<>();
+        for (BookInfoEntity bookInfo : books) {
+            BookModel book = modelMapper.map(bookInfo, BookModel.class);
+            for (BookDetailEntity bookDetail : bookInfo.getBookDetails()) {
+                if ("AL".equals(bookDetail.getId().getWebCode())) {
+                    book.setDescription(bookDetail.getDescription());
+                    break;
+                }
+            }
+            book.setRelatedBookTitle(customBook.getTitle());
+            userReleatedBooks.add(book);
+        }
+
+        return userReleatedBooks;
     }
 }

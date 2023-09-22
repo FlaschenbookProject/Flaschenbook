@@ -80,5 +80,33 @@
 
 @font-face {
     font-family: "IM";
+    font-style: normal;
+    font-weight: 100;
     src: url("../../public/IM_Hyemin-Regular.woff") format("woff");
+}
+
+@font-face {
+    font-family: "Bum";
+    font-style: normal;
+    font-weight: 100;
+    src: url("../../public/휴먼범석체.woff") format("woff");
+}
+
+@font-face {
+    font-family: "Yoony";
+    font-style: normal;
+    font-weight: 100;
+    src: url("../../public/EF_YOONY.woff") format("woff");
+}
+
+@font-face {
+    font-family: "KyoboHand";
+    font-style: normal;
+    font-weight: 100;
+    src: url("../../public/KyoboHand.woff") format("woff");
+}
+
+@font-face {
+    font-family: "uji";
+    src: url("../../public/HS유지체.woff") format("woff");
 }

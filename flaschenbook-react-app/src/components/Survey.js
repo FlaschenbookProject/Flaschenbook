@@ -142,7 +142,7 @@ function Survey() {
           >
             <div>
               <h2 className="text-center mb-4 survey-question-text">🎉</h2>
-              <button className="btn btn-primary" onClick={() => navigate("/")}>
+              <button className="btn btn-primary" onClick={() => setTimeout(() => navigate("/"), 3000)}>
                 시작하기
               </button>
             </div>

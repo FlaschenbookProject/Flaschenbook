@@ -1,5 +1,6 @@
 from typing import List, Dict
 from utils.connections import get_s3_client
+from botocore.exceptions import ClientError
 import pandas as pd
 import os
 from io import StringIO
@@ -20,11 +21,20 @@ def get_isbn_list(bucket_name: str, object_key: str) -> List[str]:
         list: ISBN 목록
     """
     s3_client = get_s3_client()
-    response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
-    csv_content = response['Body'].read().decode('utf-8')
-    df = pd.read_csv(StringIO(csv_content))
-    df = df.dropna(subset=['ISBN'])
-    df['ISBN'] = df['ISBN'].astype(str).str.split('.').str[0]
+
+    try:
+        response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+        csv_content = response['Body'].read().decode('utf-8')
+        df = pd.read_csv(StringIO(csv_content))
+        df = df.dropna(subset=['ISBN'])
+        df['ISBN'] = df['ISBN'].astype(str).str.split('.').str[0]
+    except ClientError as e:
+        # 파일이 존재하지 않는 경우 빈 리스트 반환
+        if e.response['Error']['Code'] == 'NoSuchKey':
+            return []
+        else:
+            # 다른 예외 처리가 필요한 경우 예외를 다시 발생시킴
+            raise
 
     return df['ISBN'].tolist()
 
