@@ -7,7 +7,6 @@ resource "aws_ecs_service" "flb-frontend-service" {
   enable_execute_command             = false
   health_check_grace_period_seconds  = 0
   name                               = "flb-frontend-service"
-  platform_version                   = "LATEST"
   scheduling_strategy                = "REPLICA"
   tags                               = {}
   tags_all                           = {}
@@ -23,10 +22,6 @@ resource "aws_ecs_service" "flb-frontend-service" {
   deployment_circuit_breaker {
     enable   = true
     rollback = true
-  }
-
-  deployment_controller {
-    type = "ECS"
   }
 
   load_balancer {
@@ -56,7 +51,6 @@ resource "aws_ecs_service" "flb-backend-service" {
   enable_execute_command             = false
   health_check_grace_period_seconds  = 0
   name                               = "flb-backend-service"
-  platform_version                   = "1.4.0"
   scheduling_strategy                = "REPLICA"
   tags                               = {}
   tags_all                           = {}
@@ -72,10 +66,6 @@ resource "aws_ecs_service" "flb-backend-service" {
   deployment_circuit_breaker {
     enable   = true
     rollback = true
-  }
-
-  deployment_controller {
-    type = "ECS"
   }
 
   load_balancer {
