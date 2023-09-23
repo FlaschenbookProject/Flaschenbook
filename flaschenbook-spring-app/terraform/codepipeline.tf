@@ -37,6 +37,7 @@ resource "aws_codepipeline" "pipeline" {
 
       configuration = {
         ConnectionArn    = aws_codestarconnections_connection.flb-github-connection.arn
+        DetectChanges    = false
         FullRepositoryId = var.repository_id
         BranchName       = "main"
       }
