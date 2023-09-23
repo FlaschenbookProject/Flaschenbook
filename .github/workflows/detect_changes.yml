@@ -1,0 +1,45 @@
+name: Detect Changes and Trigger AWS CodePipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "flaschenbook-react-app/**"
+      - "flaschenbook-spring-app/flaschenbook/**"
+
+jobs:
+  check_changes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Detect changes
+        id: detect
+        run: |
+          changed_services=""
+          if git diff --name-only ${{github.event.before}} ${{github.sha}} | grep -q 'flaschenbook-react-app/'
+          then
+            echo "Frontend has changed"
+            changed_services="frontend"
+          fi
+          if git diff --name-only ${{github.event.before}} ${{github.sha}} | grep -q 'flaschenbook-spring-app/flaschenbook/'
+          then
+            echo "Backend has changed"
+            changed_services="${changed_services} backend"
+          fi
+          echo "changed_services=${changed_services}" >> $GITHUB_ENV
+
+      - name: Trigger appropriate CodePipeline
+        run: |
+          IFS=' ' read -ra services <<< "${{ env.changed_services }}"
+          for service in "${services[@]}"; do
+            pipeline_name="flb-${service}-pipeline" 
+            aws codepipeline start-pipeline-execution --name $pipeline_name
+          done
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
