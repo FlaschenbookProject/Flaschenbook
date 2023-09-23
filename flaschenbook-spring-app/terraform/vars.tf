@@ -40,3 +40,5 @@ variable "db_conn_url" {}
 variable "key_name" {}
 
 variable "root_directory" {}
+
+variable "grafana_password" {}
