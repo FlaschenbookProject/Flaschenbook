@@ -20,10 +20,10 @@ FROM openjdk:17
 WORKDIR /app
 
 # 빌드 스테이지에서 생성된 JAR 파일 복사
-COPY --from=build /app/build/libs/*.jar /app/spring-boot-application.jar
+COPY --from=build COPY --from=build /app/build/libs/ /app/
 
 # 포트 노출
 EXPOSE 8000
 
 # 애플리케이션 실행
-ENTRYPOINT ["java", "-jar", "/app/spring-boot-application.jar"]
+ENTRYPOINT ["java", "-jar", "/app/flaschenbook.jar"]
