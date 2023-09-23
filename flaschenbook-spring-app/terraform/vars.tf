@@ -20,6 +20,14 @@ variable "private_subnets_cidr" {
   default     = ["10.0.16.0/20", "10.0.144.0/20"]
   description = "CIDR block for Private Subnet"
 }
+variable "codepipeline_bucket_name" {
+  type    = string
+  default = "flb-codepipeline-artifacts"
+}
+variable "repository_id" {
+  type    = string
+  default = "FlaschenbookProject/Flaschenbook"
+}
 
 variable "bucket_name" {}
 
