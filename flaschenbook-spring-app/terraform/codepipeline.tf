@@ -1,10 +1,27 @@
-resource "aws_codepipeline" "flb-frontend-pipeline" {
-  name     = "flb-frontend-pipeline"
+locals {
+  pipelines = {
+    frontend = {
+      name               = "flb-frontend-pipeline",
+      build_project_name = aws_codebuild_project.flb-frontend-codebuild.name,
+      ecs_service_name   = aws_ecs_service.flb-frontend-service.name,
+    },
+    backend = {
+      name               = "flb-backend-pipeline",
+      build_project_name = aws_codebuild_project.flb-backend-codebuild.name,
+      ecs_service_name   = aws_ecs_service.flb-backend-service.name,
+    }
+  }
+}
+
+resource "aws_codepipeline" "pipeline" {
+  for_each = local.pipelines
+
+  name     = each.value.name
   role_arn = aws_iam_role.flb-codepipeline_role.arn
 
   artifact_store {
     type     = "S3"
-    location = var.bucket_name
+    location = var.codepipeline_bucket_name
   }
 
   stage {
@@ -19,8 +36,9 @@ resource "aws_codepipeline" "flb-frontend-pipeline" {
       output_artifacts = ["source_out"]
 
       configuration = {
-        ConnectionArn    = "${aws_codestarconnections_connection.flb-github-connection.arn}"
-        FullRepositoryId = "FlaschenbookProject/Flaschenbook"
+        ConnectionArn    = aws_codestarconnections_connection.flb-github-connection.arn
+        DetectChanges    = false
+        FullRepositoryId = var.repository_id
         BranchName       = "main"
       }
     }
@@ -39,7 +57,7 @@ resource "aws_codepipeline" "flb-frontend-pipeline" {
       version          = "1"
 
       configuration = {
-        ProjectName = "${aws_codebuild_project.flb-frontend-codebuild.name}"
+        ProjectName = each.value.build_project_name
       }
     }
   }
@@ -56,7 +74,7 @@ resource "aws_codepipeline" "flb-frontend-pipeline" {
       version         = "1"
       configuration = {
         ClusterName = aws_ecs_cluster.flb-ecs-cluster.name
-        ServiceName = aws_ecs_service.flb-frontend-service.name
+        ServiceName = each.value.ecs_service_name
         FileName    = "imagedefinitions.json"
       }
     }

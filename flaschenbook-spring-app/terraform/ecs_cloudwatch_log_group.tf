@@ -11,3 +11,17 @@ resource "aws_cloudwatch_log_group" "ecs-flb-backend" {
   tags              = {}
   tags_all          = {}
 }
+
+resource "aws_cloudwatch_log_group" "ecs-flb-prometheus" {
+  name              = "/ecs/flb-prometheus"
+  retention_in_days = 0
+  tags              = {}
+  tags_all          = {}
+}
+
+resource "aws_cloudwatch_log_group" "ecs-flb-grafana" {
+  name              = "/ecs/flb-grafana"
+  retention_in_days = 0
+  tags              = {}
+  tags_all          = {}
+}

@@ -66,3 +66,39 @@ resource "aws_lb_target_group" "ecs-flb-backend-tg" {
   }
 
 }
+
+resource "aws_lb_target_group" "ecs-flb-prometheus-tg" {
+  name        = "ecs-flb-prometheus-tg"
+  port        = 9090
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.vpc.id
+  target_type = "ip"
+
+  health_check {
+    enabled             = true
+    interval            = 30
+    path                = "/-/healthy"
+    port                = "9090"
+    timeout             = 5
+    healthy_threshold   = 3
+    unhealthy_threshold = 2
+  }
+}
+
+resource "aws_lb_target_group" "ecs-flb-grafana-tg" {
+  name        = "ecs-flb-grafana-tg"
+  port        = 3000
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.vpc.id
+  target_type = "ip"
+
+  health_check {
+    enabled             = true
+    interval            = 30
+    path                = "/api/health"
+    port                = "3000"
+    timeout             = 5
+    healthy_threshold   = 3
+    unhealthy_threshold = 2
+  }
+}

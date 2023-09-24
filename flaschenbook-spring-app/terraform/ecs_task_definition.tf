@@ -33,10 +33,10 @@ resource "aws_ecs_task_definition" "flb-frontend" {
       },
     ]
   )
-  cpu                = "1024"
+  cpu                = "512"
   execution_role_arn = aws_iam_role.ecs-task-execution-role.arn
   family             = "flb-frontend"
-  memory             = "3072"
+  memory             = "1024"
   network_mode       = "awsvpc"
   requires_compatibilities = [
     "FARGATE",
@@ -100,10 +100,10 @@ resource "aws_ecs_task_definition" "flb-backend" {
       },
     ]
   )
-  cpu                = "1024"
+  cpu                = "512"
   execution_role_arn = aws_iam_role.ecs-task-execution-role.arn
   family             = "flb-backend"
-  memory             = "3072"
+  memory             = "1024"
   network_mode       = "awsvpc"
   requires_compatibilities = [
     "FARGATE",
@@ -116,4 +116,64 @@ resource "aws_ecs_task_definition" "flb-backend" {
     cpu_architecture        = "X86_64"
     operating_system_family = "LINUX"
   }
+}
+
+resource "aws_ecs_task_definition" "flb-prometheus" {
+  family                   = "flb-prometheus"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "256"
+  memory                   = "512"
+  execution_role_arn       = aws_iam_role.ecs-task-execution-role.arn
+
+  container_definitions = jsonencode([{
+    name  = "flb-prometheus"
+    image = format("%s.dkr.ecr.%s.amazonaws.com/flaschenbook-prometheus:latest", data.aws_caller_identity.current.account_id, data.aws_region.current.name)
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        "awslogs-group"         = aws_cloudwatch_log_group.ecs-flb-prometheus.name,
+        "awslogs-region"        = data.aws_region.current.name,
+        "awslogs-stream-prefix" = "ecs"
+      }
+    }
+
+    portMappings = [{
+      containerPort = 9090
+      hostPort      = 9090
+    }]
+  }])
+}
+
+resource "aws_ecs_task_definition" "flb-grafana" {
+  family                   = "flb-grafana"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "512"
+  memory                   = "1024"
+  execution_role_arn       = aws_iam_role.ecs-task-execution-role.arn
+
+  container_definitions = jsonencode([{
+    name  = "flb-grafana"
+    image = "grafana/grafana:latest"
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        "awslogs-group"         = aws_cloudwatch_log_group.ecs-flb-grafana.name,
+        "awslogs-region"        = data.aws_region.current.name,
+        "awslogs-stream-prefix" = "ecs"
+      }
+    }
+    portMappings = [{
+      containerPort = 3000
+      hostPort      = 3000
+    }],
+    environment = [{
+      name  = "GF_SECURITY_ADMIN_PASSWORD",
+      value = var.grafana_password
+      }, {
+      name  = "GF_DATASOURCES_DEFAULT_URL",
+      value = "http://${aws_lb.ecs-flb-prometheus-alb.dns_name}"
+    }]
+  }])
 }
