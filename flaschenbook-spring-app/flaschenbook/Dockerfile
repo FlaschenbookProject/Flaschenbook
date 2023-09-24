@@ -26,4 +26,4 @@ COPY --from=build /app/build/libs/ /app/
 EXPOSE 8000
 
 # 애플리케이션 실행
-ENTRYPOINT ["java", "-jar", "/app/flaschenbook.jar"]
+ENTRYPOINT ["java", "-jar", "/app/flaschenbook.jar"]
