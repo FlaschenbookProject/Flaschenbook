@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Detect changes
         id: detect
@@ -22,15 +24,22 @@ jobs:
           changed_services=""
           if git diff --name-only ${{github.event.before}} ${{github.sha}} | grep -q 'flaschenbook-react-app/'
           then
-            echo "Frontend has changed"
+            echo "::group::Frontend has changed"
             changed_services="frontend"
+            echo "::endgroup::"
           fi
           if git diff --name-only ${{github.event.before}} ${{github.sha}} | grep -q 'flaschenbook-spring-app/flaschenbook/'
           then
-            echo "Backend has changed"
+            echo "::group::Backend has changed"
             changed_services="${changed_services} backend"
+            echo "::endgroup::"
           fi
           echo "changed_services=${changed_services}" >> $GITHUB_ENV
+
+      - name: Setup AWS CLI
+        run: |
+          sudo apt-get install awscli
+          aws --version
 
       - name: Trigger appropriate CodePipeline
         run: |
